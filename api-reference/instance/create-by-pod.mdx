@@ -1,0 +1,244 @@
+---
+title: "通过Pod创建实例"
+api: "POST https://www.chenyu.cn/api/open/v2/instance/create_by_pod"
+description: "使用指定的Pod创建GPU实例"
+authMethod: "bearer"
+---
+
+# 通过Pod创建实例
+
+使用应用市场中的Pod创建一个新的GPU实例。
+
+## 请求参数
+
+<ParamField body="pod_uuid" type="string" required>
+  Pod uuid，可通过查询应用市场Pod接口获取
+</ParamField>
+
+<ParamField body="pod_tag" type="string">
+  Pod版本标签，默认使用最新版本
+</ParamField>
+
+<ParamField body="gpu_uuid" type="string" required>
+  GPU型号uuid
+</ParamField>
+
+<ParamField body="gpu_nums" type="integer" required>
+  使用GPU数量，可选值：1/2/4/8
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  返回的实例数据
+  
+  <Expandable title="data">
+    <ResponseField name="instance_uuid" type="string">
+      实例uuid
+    </ResponseField>
+    
+    <ResponseField name="status" type="integer">
+      实例状态
+    </ResponseField>
+    
+    <ResponseField name="title" type="string">
+      实例名称
+    </ResponseField>
+    
+    <ResponseField name="create_time" type="integer">
+      实例创建时间，秒级时间戳
+    </ResponseField>
+    
+    <ResponseField name="start_time" type="integer">
+      实例启动时间，秒级时间戳
+    </ResponseField>
+    
+    <ResponseField name="save_image_status" type="integer">
+      实例镜像保存状态
+      - `1`: 上传中
+      - `2`: 上传成功
+      - `3`: 上传失败
+    </ResponseField>
+    
+    <ResponseField name="charging_type" type="integer">
+      计费类型
+    </ResponseField>
+    
+    <ResponseField name="shutdown_regular" type="object">
+      定时关机设置
+      
+      <Expandable title="shutdown_regular">
+        <ResponseField name="shutdown_time" type="integer">
+          关机时间，秒级时间戳
+        </ResponseField>
+        
+        <ResponseField name="enable" type="boolean">
+          是否启用定时关机
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="image_uuid" type="string">
+      实例使用的镜像uuid
+    </ResponseField>
+    
+    <ResponseField name="image_name" type="string">
+      实例使用的镜像名称
+    </ResponseField>
+    
+    <ResponseField name="image_tag" type="string">
+      实例使用的镜像tag
+    </ResponseField>
+    
+    <ResponseField name="gpu_uuid" type="string">
+      实例使用的gpu uuid
+    </ResponseField>
+    
+    <ResponseField name="gpu_name" type="string">
+      实例使用的gpu名称
+    </ResponseField>
+    
+    <ResponseField name="gpu_nums" type="integer">
+      实例使用的gpu数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+from datetime import datetime
+
+url = "https://www.chenyu.cn/api/open/v2/instance/create_by_pod"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "pod_uuid": "pod_12345678-1234-1234-1234-123456789012",
+    "pod_tag": "v2.0",
+    "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
+    "gpu_nums": 1
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+
+if result['code'] == 0:
+    instance = result['data']
+    create_time = datetime.fromtimestamp(instance['create_time'])
+    
+    print(f"实例创建成功!")
+    print(f"实例UUID: {instance['instance_uuid']}")
+    print(f"实例名称: {instance['title']}")
+    print(f"GPU名称: {instance['gpu_name']}")
+    print(f"GPU数量: {instance['gpu_nums']}")
+    print(f"创建时间: {create_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    if instance['server_url']:
+        print("服务访问地址:")
+        for url in instance['server_url']:
+            print(f"  - {url}")
+else:
+    print(f"创建失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/instance/create_by_pod';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+const data = {
+    pod_uuid: 'pod_12345678-1234-1234-1234-123456789012',
+    pod_tag: 'v2.0',
+    gpu_uuid: 'gpu_87654321-4321-4321-4321-210987654321',
+    gpu_nums: 1
+};
+
+axios.post(url, data, { headers })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            const instance = result.data;
+            const createTime = new Date(instance.create_time * 1000);
+            
+            console.log('实例创建成功!');
+            console.log(`实例UUID: ${instance.instance_uuid}`);
+            console.log(`实例名称: ${instance.title}`);
+            console.log(`GPU名称: ${instance.gpu_name}`);
+            console.log(`GPU数量: ${instance.gpu_nums}`);
+            console.log(`创建时间: ${createTime.toLocaleString()}`);
+            
+            if (instance.server_url.length > 0) {
+                console.log('服务访问地址:');
+                instance.server_url.forEach(url => {
+                    console.log(`  - ${url}`);
+                });
+            }
+        } else {
+            console.log(`创建失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/instance/create_by_pod" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pod_uuid": "pod_12345678-1234-1234-1234-123456789012",
+    "pod_tag": "v2.0",
+    "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
+    "gpu_nums": 1
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "status": 1,
+    "title": "PyTorch深度学习实例",
+    "create_time": 1703145600,
+    "start_time": 1703145660,
+    "save_image_status": 2,
+    "charging_type": 1,
+    "shutdown_regular": {
+      "shutdown_time": 1703232000,
+      "enable": true
+    },
+    "image_uuid": "img_87654321-4321-4321-4321-210987654321",
+    "image_name": "PyTorch 2.0 环境",
+    "image_tag": "v2.0",
+    "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
+    "gpu_name": "NVIDIA RTX 4090",
+    "gpu_nums": 1
+  }
+}
+```

@@ -1,0 +1,121 @@
+---
+title: "销毁实例"
+api: "POST https://www.chenyu.cn/api/open/v2/instance/destroy"
+description: "销毁指定的实例"
+authMethod: "bearer"
+---
+
+# 销毁实例
+
+永久销毁一个实例。销毁后的实例无法恢复，所有数据将被删除。
+
+<Warning>
+销毁操作不可逆，请确保已备份重要数据。销毁后实例将无法恢复。
+</Warning>
+
+## 请求参数
+
+<ParamField body="instance_uuid" type="string" required>
+  要销毁的实例uuid
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/instance/destroy"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012"
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+
+if result['code'] == 0:
+    print("实例销毁成功")
+else:
+    print(f"销毁失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/instance/destroy';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+const data = {
+    instance_uuid: 'inst_12345678-1234-1234-1234-123456789012'
+};
+
+axios.post(url, data, { headers })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            console.log('实例销毁成功');
+        } else {
+            console.log(`销毁失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/instance/destroy" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012"
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<CodeGroup>
+
+```json 成功响应
+{
+  "code": 0,
+  "msg": "销毁成功"
+}
+```
+
+```json 失败响应
+{
+  "code": -1,
+  "msg": "实例不存在或无法销毁"
+}
+```
+
+</CodeGroup>
+
+## 注意事项
+
+- 销毁操作不可逆，请谨慎操作
+- 建议在销毁前先保存重要数据为镜像
+- 销毁后实例的所有数据将被永久删除

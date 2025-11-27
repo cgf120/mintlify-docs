@@ -1,0 +1,134 @@
+---
+title: "设置定时关机"
+api: "POST https://www.chenyu.cn/api/open/v2/instance/shutdown_timer"
+description: "为实例设置定时关机"
+authMethod: "bearer"
+---
+
+# 设置定时关机
+
+为指定实例设置定时关机功能，可以在指定时间后自动关闭实例。
+
+<Warning>
+实例定时关机时间最小为5分钟后。
+</Warning>
+
+## 请求参数
+
+<ParamField body="enable" type="boolean" required>
+  true: 启用实例定时关机 false: 取消实例定时关机
+</ParamField>
+
+<ParamField body="shutdown_time" type="integer" required>
+  实例定时关机时间，秒级时间戳
+</ParamField>
+
+<ParamField body="instance_uuid" type="string" required>
+  实例uuid
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/instance/shutdown_timer"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+# 设置60分钟后自动关机
+data = {
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "shutdown_time": 60
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+
+if result['code'] == 0:
+    print("定时关机设置成功")
+else:
+    print(f"设置失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/instance/shutdown_timer';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+// 设置60分钟后自动关机
+const data = {
+    instance_uuid: 'inst_12345678-1234-1234-1234-123456789012',
+    shutdown_time: 60
+};
+
+axios.post(url, data, { headers })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            console.log('定时关机设置成功');
+        } else {
+            console.log(`设置失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/instance/shutdown_timer" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "shutdown_time": 60
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<CodeGroup>
+
+```json 成功响应
+{
+  "code": 0,
+  "msg": "设置成功"
+}
+```
+
+```json 失败响应
+{
+  "code": -1,
+  "msg": "实例不存在或状态异常"
+}
+```
+
+</CodeGroup>
+
+## 注意事项
+
+- 设置 `shutdown_time` 为 0 可以取消已设置的定时关机
+- 定时关机时间以分钟为单位
+- 只有运行中的实例才能设置定时关机

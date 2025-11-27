@@ -1,0 +1,123 @@
+---
+title: "实例开机"
+api: "POST https://www.chenyu.cn/api/open/v2/instance/startup"
+description: "启动指定的实例"
+authMethod: "bearer"
+---
+
+# 实例开机
+
+启动一个已停止的实例。
+
+## 请求参数
+
+<ParamField body="instance_uuid" type="string" required>
+  实例uuid
+</ParamField>
+
+<ParamField body="gpu_uuid" type="string">
+  gpu型号id，默认使用创建时的gpu型号
+</ParamField>
+
+<ParamField body="gpu_nums" type="integer">
+  gpu数量，支持1/2/4/8，默认使用创建时的gpu数量
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/instance/startup"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "gpu_uuid": "gpu_12345678-1234-1234-1234-123456789012",
+    "gpu_nums": 1
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+
+if result['code'] == 0:
+    print("实例启动成功")
+else:
+    print(f"启动失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/instance/startup';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+const data = {
+    instance_uuid: 'inst_12345678-1234-1234-1234-123456789012',
+    gpu_uuid: 'gpu_12345678-1234-1234-1234-123456789012',
+    gpu_nums: 1
+};
+
+axios.post(url, data, { headers })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            console.log('实例启动成功');
+        } else {
+            console.log(`启动失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/instance/startup" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012"
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<CodeGroup>
+
+```json 成功响应
+{
+  "code": 0,
+  "msg": "启动成功"
+}
+```
+
+```json 失败响应
+{
+  "code": -1,
+  "msg": "实例不存在或已在运行中"
+}
+```
+
+</CodeGroup>

@@ -1,0 +1,213 @@
+---
+title: "消费流水查询"
+api: "GET https://www.chenyu.cn/api/open/v2/bill/list"
+description: "查询账户消费流水记录"
+authMethod: "bearer"
+---
+
+# 消费流水查询
+
+查询账户的消费流水记录，包括实例使用费用、其他服务费用等。
+
+## 请求参数
+
+<ParamField query="page" type="string" optional>
+  页码，从1开始
+</ParamField>
+
+<ParamField query="page_size" type="string" optional>
+  每页数量
+</ParamField>
+
+<ParamField query="charge_channel" type="integer" optional>
+  扣费类型
+  - `1`: 余额消费
+  - `2`: 算力卡消费
+</ParamField>
+
+<ParamField query="order_number" type="string" optional>
+  订单编号
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  消费流水数据
+  
+  <Expandable title="data">
+    <ResponseField name="order_list" type="array">
+      消费流水记录
+
+      <Expandable title="order_list">
+        <ResponseField name="amount" type="number">
+          金额
+        </ResponseField>
+
+        <ResponseField name="charge_channel" type="integer">
+          扣费类型
+          - `1`: 余额消费
+          -  `2`: 算力卡消费
+        </ResponseField>
+
+        <ResponseField name="order_number" type="string">
+          订单编号
+        </ResponseField>
+
+        <ResponseField name="order_time" type="integer">
+          订单发生时间，秒级时间戳
+        </ResponseField>
+
+        <ResponseField name="settle_start_time" type="integer">
+          计费开始时间，秒级时间戳
+        </ResponseField>
+
+        <ResponseField name="settle_end_time" type="integer">
+          计费结束时间，秒级时间戳
+        </ResponseField>
+
+        <ResponseField name="remark" type="string">
+          备注
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      总记录数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/bill/list"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+
+params = {
+    "page": "1",
+    "page_size": "10",
+    "charge_channel": 1,  # 可选，1.余额消费 2.算力卡消费
+    "order_number": "ORD123456789"  # 可选，按订单编号筛选
+}
+
+response = requests.get(url, headers=headers, params=params)
+result = response.json()
+
+if result['code'] == 0:
+    bill_data = result['data']
+    print(f"总记录数: {bill_data['total']}")
+
+    for record in bill_data['order_list']:
+        print(f"消费金额: {record['amount']}")
+        print(f"扣费渠道: {record['charge_channel']}")
+        print(f"订单编号: {record['order_number']}")
+        print(f"订单时间: {record['order_time']}")
+        print(f"备注: {record['remark']}")
+        print("---")
+else:
+    print(f"查询失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/bill/list';
+const headers = {
+    'Authorization': 'Bearer your_api_key'
+};
+
+const params = {
+    page: "1",
+    page_size: "10",
+    charge_channel: 1,  // 可选，1.余额消费 2.算力卡消费
+    order_number: "ORD123456789"  // 可选，按订单编号筛选
+};
+
+axios.get(url, { headers, params })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            const billData = result.data;
+            console.log(`总记录数: ${billData.total}`);
+
+            billData.order_list.forEach(record => {
+                console.log(`消费金额: ${record.amount}`);
+                console.log(`扣费渠道: ${record.charge_channel}`);
+                console.log(`订单编号: ${record.order_number}`);
+                console.log(`订单时间: ${record.order_time}`);
+                console.log(`备注: ${record.remark}`);
+                console.log('---');
+            });
+        } else {
+            console.log(`查询失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/bill/list?page=1&page_size=10&charge_channel=1&order_number=ORD123456789" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<CodeGroup>
+
+```json 成功响应
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "order_list": [
+      {
+        "amount": 25.50,
+        "charge_channel": 1,
+        "order_number": "ORD20240115143025001",
+        "order_time": 1705308625,
+        "settle_start_time": 1705308000,
+        "settle_end_time": 1705308625,
+        "remark": "GPU实例使用费用"
+      },
+      {
+        "amount": 10.00,
+        "charge_channel": 2,
+        "order_number": "ORD20240115120000002",
+        "order_time": 1705299600,
+        "settle_start_time": 1705299000,
+        "settle_end_time": 1705299600,
+        "remark": "存储费用"
+      }
+    ],
+    "total": 156
+  }
+}
+```
+
+```json 失败响应
+{
+  "code": -1,
+  "msg": "查询失败"
+}
+```
+
+</CodeGroup>

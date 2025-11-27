@@ -1,0 +1,1950 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "center-ai",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {
+    "/api/open/v2/pod/list": {
+      "get": {
+        "summary": "查询应用市场Pod",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "pod_list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "description": "Pod名称"
+                              },
+                              "uuid": {
+                                "type": "string",
+                                "description": "Pod uuid"
+                              },
+                              "remark": {
+                                "type": "string",
+                                "description": "Pod描述"
+                              },
+                              "pod_tag": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "description": "Pod版本"
+                              },
+                              "price": {
+                                "type": "object",
+                                "properties": {
+                                  "hour": {
+                                    "type": "number",
+                                    "description": "按小时定价"
+                                  },
+                                  "day": {
+                                    "type": "number",
+                                    "description": "按天定价"
+                                  },
+                                  "week": {
+                                    "type": "number",
+                                    "description": "按周定价"
+                                  },
+                                  "month": {
+                                    "type": "number",
+                                    "description": "按月定价"
+                                  },
+                                  "year": {
+                                    "type": "number",
+                                    "description": "按年定价"
+                                  }
+                                },
+                                "required": [
+                                  "hour"
+                                ],
+                                "description": "价格"
+                              }
+                            },
+                            "required": [
+                              "title",
+                              "uuid",
+                              "remark",
+                              "pod_tag",
+                              "price"
+                            ]
+                          },
+                          "description": "镜像名称"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数量"
+                        }
+                      },
+                      "required": [
+                        "pod_list",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/image/market/list": {
+      "get": {
+        "summary": "查询算力市场镜像",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "image_list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "description": "镜像名称"
+                              },
+                              "uuid": {
+                                "type": "string",
+                                "description": "镜像uuid"
+                              },
+                              "size": {
+                                "type": "number",
+                                "description": "镜像大小 GB"
+                              }
+                            },
+                            "required": [
+                              "title",
+                              "uuid",
+                              "size"
+                            ]
+                          },
+                          "description": "镜像名称"
+                        }
+                      },
+                      "required": [
+                        "image_list"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/image/private/list": {
+      "get": {
+        "summary": "查询个人镜像",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "title": "响应编码",
+                      "description": "0:成功\n2:未登录\n-2:系统异常\n\n"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "返回消息，非0显示错误原因"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "image_list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "description": "镜像名称"
+                              },
+                              "uuid": {
+                                "type": "string",
+                                "description": "镜像uuid"
+                              },
+                              "remark": {
+                                "type": "string",
+                                "description": "镜像描述"
+                              },
+                              "layer_count": {
+                                "type": "integer",
+                                "description": "层数"
+                              },
+                              "size": {
+                                "type": "number",
+                                "description": "镜像大小 GB"
+                              },
+                              "pod_uuid": {
+                                "type": "string",
+                                "description": "来源pod uuid"
+                              },
+                              "pod_tag": {
+                                "type": "string",
+                                "description": "来源pod版本"
+                              },
+                              "save_image_status": {
+                                "type": "integer",
+                                "description": "镜像保存状态\n1.上传中\n2.上传成功\n3.上传失败"
+                              },
+                              "create_time": {
+                                "type": "integer",
+                                "description": "镜像创建时间，秒级时间戳"
+                              }
+                            },
+                            "required": [
+                              "title",
+                              "uuid",
+                              "remark",
+                              "pod_uuid",
+                              "save_image_status",
+                              "size",
+                              "pod_tag",
+                              "layer_count",
+                              "create_time"
+                            ]
+                          },
+                          "description": "镜像名称"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数量"
+                        }
+                      },
+                      "required": [
+                        "image_list",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/image/private/delete": {
+      "post": {
+        "summary": "删除个人镜像",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image_uuid": {
+                    "type": "string",
+                    "description": "镜像uuid"
+                  }
+                },
+                "required": [
+                  "image_uuid"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/create_by_pod": {
+      "post": {
+        "summary": "通过Pod创建实例",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pod_uuid": {
+                    "type": "string",
+                    "description": "Pod uuid"
+                  },
+                  "pod_tag": {
+                    "type": "string",
+                    "description": "Pod版本"
+                  },
+                  "gpu_uuid": {
+                    "type": "string",
+                    "description": "gpu型号uuid"
+                  },
+                  "gpu_nums": {
+                    "type": "integer",
+                    "description": "使用gpu数量  1/2/4/8"
+                  }
+                },
+                "required": [
+                  "pod_uuid",
+                  "pod_tag",
+                  "gpu_uuid",
+                  "gpu_nums"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "instance_uuid": {
+                          "type": "string",
+                          "description": "实例uuid"
+                        },
+                        "status": {
+                          "type": "integer",
+                          "description": "实例状态"
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "实例名称"
+                        },
+                        "create_time": {
+                          "type": "integer",
+                          "description": "实例创建时间，秒级时间戳"
+                        },
+                        "start_time": {
+                          "type": "integer",
+                          "description": "实例启动时间，秒级时间戳"
+                        },
+                        "server_url": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "开放服务url"
+                        },
+                        "save_image_status": {
+                          "type": "integer",
+                          "description": "实例镜像保存状态\n1.上传中\n2.上传成功\n3.上传失败"
+                        },
+                        "charging_type": {
+                          "type": "integer",
+                          "description": "计费类型"
+                        },
+                        "shutdown_regular": {
+                          "type": "object",
+                          "properties": {
+                            "shutdown_time": {
+                              "type": "integer",
+                              "description": "关机时间，秒级时间戳"
+                            },
+                            "enable": {
+                              "type": "boolean",
+                              "description": "是否启用"
+                            }
+                          },
+                          "required": [
+                            "shutdown_time",
+                            "enable"
+                          ],
+                          "description": "定时关机"
+                        },
+                        "image_uuid": {
+                          "type": "string",
+                          "description": "实例使用的镜像uuid"
+                        },
+                        "image_name": {
+                          "type": "string",
+                          "description": "实例使用的镜像名称"
+                        },
+                        "image_tag": {
+                          "type": "string",
+                          "description": "实例使用的镜像tag"
+                        },
+                        "gpu_uuid": {
+                          "type": "string",
+                          "description": "实例使用的gpu uuid"
+                        },
+                        "gpu_name": {
+                          "type": "string",
+                          "description": "实例使用的gpu名称"
+                        },
+                        "gpu_nums": {
+                          "type": "integer",
+                          "description": "实例使用的gpu数量"
+                        }
+                      },
+                      "required": [
+                        "instance_uuid",
+                        "status",
+                        "title",
+                        "create_time",
+                        "start_time",
+                        "server_url",
+                        "save_image_status",
+                        "charging_type",
+                        "shutdown_regular",
+                        "image_uuid",
+                        "image_name",
+                        "image_tag",
+                        "gpu_uuid",
+                        "gpu_name",
+                        "gpu_nums"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/create_by_image": {
+      "post": {
+        "summary": "通过镜像创建实例 Copy",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image_uuid": {
+                    "type": "string",
+                    "description": "镜像uuid"
+                  },
+                  "gpu_uuid": {
+                    "type": "string",
+                    "description": "gpu型号uuid"
+                  },
+                  "gpu_nums": {
+                    "type": "integer",
+                    "description": "使用gpu数量  1/2/4/8"
+                  }
+                },
+                "required": [
+                  "image_uuid",
+                  "gpu_uuid",
+                  "gpu_nums"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "instance_uuid": {
+                          "type": "string",
+                          "description": "实例uuid"
+                        },
+                        "status": {
+                          "type": "integer",
+                          "description": "实例状态"
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "实例名称"
+                        },
+                        "create_time": {
+                          "type": "integer",
+                          "description": "实例创建时间，秒级时间戳"
+                        },
+                        "start_time": {
+                          "type": "integer",
+                          "description": "实例启动时间，秒级时间戳"
+                        },
+                        "server_url": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "开放服务url"
+                        },
+                        "save_image_status": {
+                          "type": "integer",
+                          "description": "实例镜像保存状态\n1.上传中\n2.上传成功\n3.上传失败"
+                        },
+                        "charging_type": {
+                          "type": "integer",
+                          "description": "计费类型"
+                        },
+                        "shutdown_regular": {
+                          "type": "object",
+                          "properties": {
+                            "shutdown_time": {
+                              "type": "integer",
+                              "description": "关机时间，秒级时间戳"
+                            },
+                            "enable": {
+                              "type": "boolean",
+                              "description": "是否启用"
+                            }
+                          },
+                          "required": [
+                            "shutdown_time",
+                            "enable"
+                          ],
+                          "description": "定时关机"
+                        },
+                        "image_uuid": {
+                          "type": "string",
+                          "description": "实例使用的镜像uuid"
+                        },
+                        "image_name": {
+                          "type": "string",
+                          "description": "实例使用的镜像名称"
+                        },
+                        "image_tag": {
+                          "type": "string",
+                          "description": "实例使用的镜像tag"
+                        },
+                        "gpu_uuid": {
+                          "type": "string",
+                          "description": "实例使用的gpu uuid"
+                        },
+                        "gpu_name": {
+                          "type": "string",
+                          "description": "实例使用的gpu名称"
+                        },
+                        "gpu_nums": {
+                          "type": "integer",
+                          "description": "实例使用的gpu数量"
+                        }
+                      },
+                      "required": [
+                        "instance_uuid",
+                        "status",
+                        "title",
+                        "create_time",
+                        "start_time",
+                        "server_url",
+                        "save_image_status",
+                        "charging_type",
+                        "shutdown_regular",
+                        "image_uuid",
+                        "image_name",
+                        "image_tag",
+                        "gpu_uuid",
+                        "gpu_name",
+                        "gpu_nums"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/list": {
+      "get": {
+        "summary": "实例列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "instance_list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "instance_uuid": {
+                                "type": "string",
+                                "description": "实例uuid"
+                              },
+                              "status": {
+                                "type": "integer",
+                                "description": "实例状态"
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "实例名称"
+                              },
+                              "create_time": {
+                                "type": "integer",
+                                "description": "实例创建时间，秒级时间戳"
+                              },
+                              "start_time": {
+                                "type": "integer",
+                                "description": "实例启动时间，秒级时间戳"
+                              },
+                              "server_url": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "description": "开放服务url"
+                              },
+                              "save_image_status": {
+                                "type": "integer",
+                                "description": "实例镜像保存状态\n1.上传中\n2.上传成功\n3.上传失败"
+                              },
+                              "charging_type": {
+                                "type": "integer",
+                                "description": "计费类型"
+                              },
+                              "shutdown_regular": {
+                                "type": "object",
+                                "properties": {
+                                  "shutdown_time": {
+                                    "type": "integer",
+                                    "description": "关机时间，秒级时间戳"
+                                  },
+                                  "enable": {
+                                    "type": "boolean",
+                                    "description": "是否启用"
+                                  }
+                                },
+                                "required": [
+                                  "shutdown_time",
+                                  "enable"
+                                ],
+                                "description": "定时关机"
+                              },
+                              "image_uuid": {
+                                "type": "string",
+                                "description": "实例使用的镜像uuid"
+                              },
+                              "image_name": {
+                                "type": "string",
+                                "description": "实例使用的镜像名称"
+                              },
+                              "image_tag": {
+                                "type": "string",
+                                "description": "实例使用的镜像tag"
+                              },
+                              "gpu_uuid": {
+                                "type": "string",
+                                "description": "实例使用的gpu uuid"
+                              },
+                              "gpu_name": {
+                                "type": "string",
+                                "description": "实例使用的gpu名称"
+                              },
+                              "gpu_nums": {
+                                "type": "integer",
+                                "description": "实例使用的gpu数量"
+                              }
+                            },
+                            "required": [
+                              "instance_uuid",
+                              "status",
+                              "title",
+                              "create_time",
+                              "start_time",
+                              "server_url",
+                              "save_image_status",
+                              "charging_type",
+                              "shutdown_regular",
+                              "image_uuid",
+                              "image_name",
+                              "image_tag",
+                              "gpu_uuid",
+                              "gpu_name",
+                              "gpu_nums"
+                            ]
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数量"
+                        }
+                      },
+                      "required": [
+                        "instance_list",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/startup": {
+      "post": {
+        "summary": "实例开机",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instance_uuid": {
+                    "type": "string",
+                    "description": "实例uuid"
+                  },
+                  "gpu_uuid": {
+                    "type": "string",
+                    "description": "gpu型号id"
+                  },
+                  "gpu_nums": {
+                    "type": "integer",
+                    "description": "gpu数量  支持1/2/4/8"
+                  }
+                },
+                "required": [
+                  "instance_uuid",
+                  "gpu_uuid",
+                  "gpu_nums"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/shutdown": {
+      "post": {
+        "summary": "实例关机",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instance_uuid": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "instance_uuid"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/restart": {
+      "post": {
+        "summary": "实例重启",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instance_uuid": {
+                    "type": "string",
+                    "description": "实例uuid"
+                  }
+                },
+                "required": [
+                  "instance_uuid"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/shutdown_timer": {
+      "post": {
+        "summary": "设置实例定时关机",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enable": {
+                    "type": "boolean",
+                    "description": "true: 启用实例定时关机 false:关闭实例定时关机"
+                  },
+                  "shutdown_time": {
+                    "type": "integer",
+                    "description": "实例定时关机时间，秒级时间戳"
+                  },
+                  "instance_uuid": {
+                    "type": "string",
+                    "description": "实例uuid"
+                  }
+                },
+                "required": [
+                  "enable",
+                  "shutdown_time",
+                  "instance_uuid"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/destroy": {
+      "post": {
+        "summary": "实例销毁",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instance_uuid": {
+                    "type": "string",
+                    "description": "实例uuid"
+                  }
+                },
+                "required": [
+                  "instance_uuid"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/instance/save_image": {
+      "post": {
+        "summary": "实例保存镜像",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instance_uuid": {
+                    "type": "string",
+                    "description": "实例uuid"
+                  }
+                },
+                "required": [
+                  "instance_uuid"
+                ]
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/balance/info": {
+      "get": {
+        "summary": "余额查询",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "balance": {
+                          "type": "number",
+                          "description": "充值余额"
+                        },
+                        "card_balance": {
+                          "type": "number",
+                          "description": "算力卡余额"
+                        }
+                      },
+                      "required": [
+                        "balance",
+                        "card_balance"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/recharge/list": {
+      "get": {
+        "summary": "充值记录",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trade_number",
+            "in": "query",
+            "description": "订单号",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recharge_list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "amount": {
+                                "type": "number",
+                                "description": "充值金额"
+                              },
+                              "trade_time": {
+                                "type": "integer",
+                                "description": "订单产生时间，秒级时间戳"
+                              },
+                              "pay_time": {
+                                "type": "integer",
+                                "description": "支付时间，秒级时间戳"
+                              },
+                              "trade_number": {
+                                "type": "string",
+                                "description": "交易编号"
+                              }
+                            },
+                            "required": [
+                              "amount",
+                              "trade_number",
+                              "trade_time",
+                              "pay_time"
+                            ]
+                          },
+                          "description": "充值记录"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数量"
+                        }
+                      },
+                      "required": [
+                        "recharge_list",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/bill/list": {
+      "get": {
+        "summary": "消费流水查询",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "order_channel",
+            "in": "query",
+            "description": "扣费渠道\n1.余额消费\n2.算力卡消费",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "order_number",
+            "in": "query",
+            "description": "订单编号",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "order_list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "amount": {
+                                "type": "number",
+                                "description": "金额"
+                              },
+                              "charge_channel": {
+                                "type": "integer",
+                                "description": "扣费渠道 1.余额 2.算力卡"
+                              },
+                              "order_number": {
+                                "type": "string",
+                                "description": "订单编号"
+                              },
+                              "order_time": {
+                                "type": "integer",
+                                "description": "订单发生时间，秒级时间戳"
+                              },
+                              "settle_start_time": {
+                                "type": "integer",
+                                "description": "计费开始时间，秒级时间戳"
+                              },
+                              "settle_end_time": {
+                                "type": "integer",
+                                "description": "计费结束时间，秒级时间戳"
+                              },
+                              "remark": {
+                                "type": "string",
+                                "description": "备注"
+                              }
+                            },
+                            "required": [
+                              "amount",
+                              "charge_channel",
+                              "order_number",
+                              "order_time",
+                              "remark",
+                              "settle_start_time",
+                              "settle_end_time"
+                            ]
+                          },
+                          "description": "消费流水记录"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数量"
+                        }
+                      },
+                      "required": [
+                        "order_list",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/card/list": {
+      "get": {
+        "summary": "算力卡查询",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "card_list": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "leave_amount": {
+                                "type": "number",
+                                "description": "余额"
+                              },
+                              "face_amount": {
+                                "type": "number",
+                                "description": "面值"
+                              },
+                              "sale_price": {
+                                "type": "number",
+                                "description": "售价"
+                              },
+                              "bind_time": {
+                                "type": "integer",
+                                "description": "绑定时间，秒级时间戳"
+                              },
+                              "expire_date": {
+                                "type": "integer",
+                                "description": "过期时间，秒级时间戳"
+                              },
+                              "bind_txt": {
+                                "type": "string",
+                                "description": "绑定信息"
+                              },
+                              "card_no": {
+                                "type": "string",
+                                "description": "卡号"
+                              },
+                              "pods": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "uuid": {
+                                      "type": "string"
+                                    },
+                                    "title": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "uuid",
+                                    "title"
+                                  ]
+                                },
+                                "description": "算力卡支持扣费的pod，为空则支持所有pod"
+                              },
+                              "status_txt": {
+                                "type": "string",
+                                "description": "状态信息"
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "算力卡名称"
+                              },
+                              "uuid": {
+                                "type": "string",
+                                "description": "算力卡uuid"
+                              },
+                              "valid_days": {
+                                "type": "integer",
+                                "description": "算力卡有效期"
+                              }
+                            },
+                            "required": [
+                              "face_amount",
+                              "leave_amount",
+                              "bind_time",
+                              "bind_txt",
+                              "card_no",
+                              "expire_date",
+                              "status_txt",
+                              "title",
+                              "uuid",
+                              "valid_days",
+                              "sale_price"
+                            ]
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数量"
+                        }
+                      },
+                      "required": [
+                        "card_list",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/open/v2/gpu/list": {
+      "get": {
+        "summary": "获取平台gpu列表",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "gpu_list": {
+                          "type": "object",
+                          "properties": {
+                            "gpu_name": {
+                              "type": "string",
+                              "description": "gpu名称"
+                            },
+                            "gpu_uuid": {
+                              "type": "string",
+                              "description": "gpu唯一id"
+                            },
+                            "status": {
+                              "type": "integer",
+                              "description": "状态"
+                            },
+                            "price": {
+                              "type": "object",
+                              "properties": {
+                                "hour": {
+                                  "type": "number",
+                                  "description": "按小时定价"
+                                },
+                                "day": {
+                                  "type": "number",
+                                  "description": "按天定价"
+                                },
+                                "week": {
+                                  "type": "number",
+                                  "description": "按周定价"
+                                },
+                                "month": {
+                                  "type": "number",
+                                  "description": "按月定价"
+                                },
+                                "year": {
+                                  "type": "number",
+                                  "description": "按年定价"
+                                }
+                              },
+                              "required": [
+                                "hour"
+                              ],
+                              "description": "价格"
+                            }
+                          },
+                          "required": [
+                            "gpu_name",
+                            "gpu_uuid",
+                            "status",
+                            "price"
+                          ],
+                          "description": "平台gpu列表"
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数量"
+                        }
+                      },
+                      "required": [
+                        "gpu_list",
+                        "total"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "code",
+                    "msg"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "code-msg": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "响应码"
+          },
+          "msg": {
+            "type": "string",
+            "description": "响应信息"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ]
+      },
+      "计价": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "type": "object",
+            "properties": {
+              "hour": {
+                "type": "number",
+                "description": "按小时定价"
+              },
+              "day": {
+                "type": "number",
+                "description": "按天定价"
+              },
+              "week": {
+                "type": "number",
+                "description": "按周定价"
+              },
+              "month": {
+                "type": "number",
+                "description": "按月定价"
+              },
+              "year": {
+                "type": "number",
+                "description": "按年定价"
+              }
+            },
+            "required": [
+              "hour"
+            ],
+            "description": "价格"
+          }
+        },
+        "required": [
+          "price"
+        ]
+      },
+      "实例信息": {
+        "type": "object",
+        "properties": {
+          "instance_uuid": {
+            "type": "string",
+            "description": "实例uuid"
+          },
+          "status": {
+            "type": "integer",
+            "description": "实例状态"
+          },
+          "title": {
+            "type": "string",
+            "description": "实例名称"
+          },
+          "create_time": {
+            "type": "integer",
+            "description": "实例创建时间，秒级时间戳"
+          },
+          "start_time": {
+            "type": "integer",
+            "description": "实例启动时间，秒级时间戳"
+          },
+          "server_url": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "开放服务url"
+          },
+          "save_image_status": {
+            "type": "integer",
+            "description": "实例镜像保存状态\n1.上传中\n2.上传成功\n3.上传失败"
+          },
+          "charging_type": {
+            "type": "integer",
+            "description": "计费类型"
+          },
+          "shutdown_regular": {
+            "type": "object",
+            "properties": {
+              "shutdown_time": {
+                "type": "integer",
+                "description": "关机时间，秒级时间戳"
+              },
+              "enable": {
+                "type": "boolean",
+                "description": "是否启用"
+              }
+            },
+            "required": [
+              "shutdown_time",
+              "enable"
+            ],
+            "description": "定时关机"
+          },
+          "image_uuid": {
+            "type": "string",
+            "description": "实例使用的镜像uuid"
+          },
+          "image_name": {
+            "type": "string",
+            "description": "实例使用的镜像名称"
+          },
+          "image_tag": {
+            "type": "string",
+            "description": "实例使用的镜像tag"
+          },
+          "gpu_uuid": {
+            "type": "string",
+            "description": "实例使用的gpu uuid"
+          },
+          "gpu_name": {
+            "type": "string",
+            "description": "实例使用的gpu名称"
+          },
+          "gpu_nums": {
+            "type": "integer",
+            "description": "实例使用的gpu数量"
+          }
+        },
+        "required": [
+          "status",
+          "image_uuid",
+          "instance_uuid",
+          "image_name",
+          "image_tag",
+          "gpu_uuid",
+          "gpu_name",
+          "title",
+          "save_image_status",
+          "shutdown_regular",
+          "charging_type",
+          "create_time",
+          "start_time",
+          "gpu_nums",
+          "server_url"
+        ]
+      }
+    },
+    "securitySchemes": {}
+  },
+  "servers": [],
+  "security": []
+}

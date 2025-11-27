@@ -1,0 +1,161 @@
+---
+title: "更新实例标题（暂未发布）"
+api: "POST https://www.chenyu.cn/api/open/v2/instance/update_title"
+description: "更新实例的标题（名称）"
+authMethod: "bearer"
+---
+
+# 更新实例标题
+
+更新指定实例的标题
+
+## 请求参数
+
+<ParamField body="instance_uuid" type="string" required>
+  实例的UUID
+</ParamField>
+
+<ParamField body="title" type="string">
+  新的标题，可以为空，长度不超过50个字符
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/instance/update_title"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "instance_uuid": "046cff0c6c3444a8884800d0fdfc5d95",
+    "title": "我的新实例名称"
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+
+if result['code'] == 0:
+    print(f"更新成功: {result['msg']}")
+else:
+    print(f"更新失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/instance/update_title';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+const data = {
+    instance_uuid: '046cff0c6c3444a8884800d0fdfc5d95',
+    title: '我的新实例名称'
+};
+
+axios.post(url, data, { headers })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            console.log(`更新成功: ${result.msg}`);
+        } else {
+            console.log(`更新失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/instance/update_title" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instance_uuid": "046cff0c6c3444a8884800d0fdfc5d95",
+    "title": "我的新实例名称"
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<CodeGroup>
+
+```json 成功响应
+{
+  "code": 0,
+  "msg": "更新成功"
+}
+```
+
+```json 参数错误
+{
+  "code": 1,
+  "msg": "参数解析失败"
+}
+```
+
+```json 标题长度超限
+{
+  "code": 1,
+  "msg": "标题长度不能超过50个字符"
+}
+```
+
+```json 实例不存在
+{
+  "code": 1,
+  "msg": "实例不存在"
+}
+```
+
+```json 无权限
+{
+  "code": 1,
+  "msg": "无权操作此实例"
+}
+```
+
+```json 实例已删除
+{
+  "code": 1,
+  "msg": "实例不存在或已删除"
+}
+```
+
+```json 未登录
+{
+  "code": 2,
+  "msg": "请先登录"
+}
+```
+
+```json 系统错误
+{
+  "code": -2,
+  "msg": "执行失败"
+}
+```
+
+</CodeGroup>
+

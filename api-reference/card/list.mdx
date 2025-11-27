@@ -1,0 +1,230 @@
+---
+title: "算力卡查询"
+api: "GET https://www.chenyu.cn/api/open/v2/card/list"
+description: "查询用户的算力卡信息"
+authMethod: "bearer"
+---
+
+# 算力卡查询
+
+查询当前用户的算力卡信息，包括卡类型、余额、到期时间等。
+
+## 请求参数
+
+<ParamField query="page" type="integer" optional>
+  页码，从1开始
+</ParamField>
+
+<ParamField query="page_size" type="integer" optional>
+  每页数量
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  算力卡数据
+  
+  <Expandable title="data">
+    <ResponseField name="card_list" type="array">
+      算力卡列表
+      
+      <Expandable title="card_list">
+        <ResponseField name="leave_amount" type="number">
+          余额
+        </ResponseField>
+
+        <ResponseField name="face_amount" type="number">
+          面值
+        </ResponseField>
+
+        <ResponseField name="sale_price" type="number">
+          售价
+        </ResponseField>
+
+        <ResponseField name="bind_time" type="integer">
+          绑定时间，秒级时间戳
+        </ResponseField>
+
+        <ResponseField name="expire_date" type="integer">
+          过期时间，秒级时间戳
+        </ResponseField>
+
+        <ResponseField name="bind_txt" type="string">
+          绑定信息
+        </ResponseField>
+
+        <ResponseField name="card_no" type="string">
+          卡号
+        </ResponseField>
+
+        <ResponseField name="pods" type="array">
+          算力卡支持扣费的pod，为空则支持所有pod
+
+          <Expandable title="pods">
+            <ResponseField name="uuid" type="string">
+              Pod UUID
+            </ResponseField>
+
+            <ResponseField name="title" type="string">
+              Pod标题
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+
+        <ResponseField name="status_txt" type="string">
+          状态信息
+        </ResponseField>
+
+        <ResponseField name="title" type="string">
+          算力卡名称
+        </ResponseField>
+
+        <ResponseField name="uuid" type="string">
+          算力卡uuid
+        </ResponseField>
+
+        <ResponseField name="valid_days" type="integer">
+          算力卡有效期
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      总记录数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/card/list"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+
+params = {
+    "page": 1,
+    "page_size": 10
+}
+
+response = requests.get(url, headers=headers, params=params)
+result = response.json()
+
+if result['code'] == 0:
+    card_data = result['data']
+    print(f"总记录数: {card_data['total']}")
+
+    for card in card_data['card_list']:
+        print(f"算力卡名称: {card['title']}")
+        print(f"卡号: {card['card_no']}")
+        print(f"余额: {card['leave_amount']}")
+        print(f"面值: {card['face_amount']}")
+        print(f"状态: {card['status_txt']}")
+        print(f"过期时间: {card['expire_date']}")
+        print("---")
+else:
+    print(f"查询失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/card/list';
+const headers = {
+    'Authorization': 'Bearer your_api_key'
+};
+
+const params = {
+    page: 1,
+    page_size: 10
+};
+
+axios.get(url, { headers, params })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            const cardData = result.data;
+            console.log(`总记录数: ${cardData.total}`);
+
+            cardData.card_list.forEach(card => {
+                console.log(`算力卡名称: ${card.title}`);
+                console.log(`卡号: ${card.card_no}`);
+                console.log(`余额: ${card.leave_amount}`);
+                console.log(`面值: ${card.face_amount}`);
+                console.log(`状态: ${card.status_txt}`);
+                console.log(`过期时间: ${card.expire_date}`);
+                console.log('---');
+            });
+        } else {
+            console.log(`查询失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/card/list?page=1&page_size=10" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<CodeGroup>
+
+```json 成功响应
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "card_list": [
+      {
+        "leave_amount": 100.5,
+        "face_amount": 200.0,
+        "sale_price": 180.0,
+        "bind_time": 1705294225,
+        "expire_date": 1735689599,
+        "bind_txt": "已绑定",
+        "card_no": "CARD20240115001",
+        "pods": [
+          {
+            "uuid": "pod_12345678-1234-1234-1234-123456789012",
+            "title": "PyTorch环境"
+          }
+        ],
+        "status_txt": "正常",
+        "title": "GPU算力卡",
+        "uuid": "card_12345678-1234-1234-1234-123456789012",
+        "valid_days": 365
+      }
+    ],
+    "total": 1
+  }
+}
+```
+
+```json 失败响应
+{
+  "code": -1,
+  "msg": "查询失败"
+}
+```
+
+</CodeGroup>

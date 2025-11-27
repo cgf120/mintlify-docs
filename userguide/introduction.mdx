@@ -1,0 +1,84 @@
+---
+title: "简介"
+description: "晨羽智云开放接口服务"
+icon: "house"
+---
+
+欢迎使用晨羽智云开放接口文档！晨羽智云是一个专业的AI云算力服务平台，我们提供高性能可伸缩的
+GPU算力资源云服务解决方案。
+
+## 快速开始
+
+<Steps>
+  <Step title="注册账户">
+    访问 [晨羽智云控制台](https://www.chenyu.cn/console) 注册账户并通过实名认证
+  </Step>
+  <Step title="充值账户">
+    为您的账户充值，获得使用算力资源的权限
+  </Step>
+  <Step title="创建实例">
+    选择合适的GPU型号和配置，创建您的第一个实例
+  </Step>
+  <Step title="开始使用">
+    通过HTTPS/TCP端口连接实例，开始您的AI工作
+  </Step>
+</Steps>
+
+## 应用场景
+
+<Tabs>
+  <Tab title="AI应用支撑">
+    聚焦自身的AI应用，只需按量付费，即可以支撑大规模的AI应用
+  </Tab>
+  <Tab title="AI教学平台">
+    支撑大规模AI教学培训活动
+  </Tab>
+  <Tab title="模型推理部署">
+    支持部署模型推理服务
+  </Tab>
+</Tabs>
+
+## 开始探索
+
+准备好开始使用
+
+<CardGroup cols={2}>
+  <Card title="快速入门指南" icon="rocket" href="/userguide/quickstart">
+    了解如何快速创建和管理您的第一个实例
+  </Card>
+  <Card title="API 参考文档" icon="book" href="/api-reference">
+    查看完整的API接口文档和示例代码
+  </Card>
+  <Card title="API 认证指南" icon="key" href="/userguide/authentication">
+    学习如何安全地使用API接口
+  </Card>
+  <Card title="联系支持" icon="headset" href="#" onClick="showSupportModal()">
+    遇到问题？我们的技术团队随时为您提供帮助
+  </Card>
+</CardGroup>
+
+---
+
+
+{/* 联系支持弹框 */}
+<div id="support-modal" className="support-modal">
+  <div className="modal-content">
+    <button className="close-button" type="button">
+      <span className="close-icon">×</span>
+    </button>
+    <div className="modal-header">
+      <h3 className="modal-title">联系技术支持</h3>
+      <p className="modal-subtitle">扫描下方二维码获取专业技术支持</p>
+    </div>
+    <div className="qr-code-container">
+      <img
+        src="https://img.cyuai.com/cpn/material/83ab67cf9a7940e3bea37b28d8fa07ed.png?2025073018"
+        alt="联系支持二维码"
+        className="qr-code-image"
+      />
+    </div>
+    <div className="modal-footer">
+      <p>我们的技术团队将为您提供技术支持服务</p>
+    </div>
+  </div>
+</div>

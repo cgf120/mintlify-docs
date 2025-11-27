@@ -1,0 +1,309 @@
+---
+title: "查询实例详情"
+api: "GET https://www.chenyu.cn/api/open/v2/instance/info"
+description: "查询指定实例的详细信息"
+authMethod: "bearer"
+---
+
+# 查询实例详情
+
+查询指定实例的详细信息，包括服务地址、SSH连接信息等。
+
+## 请求参数
+
+<ParamField query="instance_uuid" type="string" required>
+  实例UUID
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  实例详细信息
+  
+  <Expandable title="data">
+    <ResponseField name="instance_uuid" type="string">
+      实例UUID
+    </ResponseField>
+    
+    <ResponseField name="status" type="integer">
+      实例状态
+      - `2`: 运行中
+      - `21`: 关机中
+      - `22`: 已关机
+      - `24`: 开机中
+      - `27`: 重启中
+    </ResponseField>
+    
+    <ResponseField name="title" type="string">
+      实例标题
+    </ResponseField>
+    
+    <ResponseField name="create_time" type="integer">
+      创建时间（Unix时间戳）
+    </ResponseField>
+    
+    <ResponseField name="start_time" type="integer">
+      启动时间（Unix时间戳）
+    </ResponseField>
+    
+    <ResponseField name="server_url" type="array">
+      服务地址列表
+    </ResponseField>
+    
+    <ResponseField name="server_map" type="array">
+      服务映射详情
+      
+      <Expandable title="server_map">
+        <ResponseField name="title" type="string">
+          服务标题
+        </ResponseField>
+        
+        <ResponseField name="url" type="string">
+          服务URL
+        </ResponseField>
+        
+        <ResponseField name="port_type" type="string">
+          端口类型（http/ssh）
+        </ResponseField>
+        
+        <ResponseField name="protocol" type="string">
+          协议类型（tcp/udp）
+        </ResponseField>
+        
+        <ResponseField name="ssh_info" type="object">
+          SSH连接信息（仅当port_type为ssh时存在）
+          
+          <Expandable title="ssh_info">
+            <ResponseField name="host" type="string">
+              SSH主机地址
+            </ResponseField>
+            
+            <ResponseField name="port" type="integer">
+              SSH端口
+            </ResponseField>
+            
+            <ResponseField name="username" type="string">
+              SSH用户名
+            </ResponseField>
+            
+            <ResponseField name="password" type="string">
+              SSH密码
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="save_image_status" type="integer">
+      保存镜像状态
+    </ResponseField>
+    
+    <ResponseField name="charging_type" type="integer">
+      计费类型
+    </ResponseField>
+    
+    <ResponseField name="shutdown_regular" type="object">
+      定时关机设置
+      
+      <Expandable title="shutdown_regular">
+        <ResponseField name="shutdown_time" type="integer">
+          定时关机时间（Unix时间戳）
+        </ResponseField>
+        
+        <ResponseField name="enable" type="boolean">
+          是否启用定时关机
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="image_uuid" type="string">
+      镜像UUID
+    </ResponseField>
+    
+    <ResponseField name="image_name" type="string">
+      镜像名称
+    </ResponseField>
+    
+    <ResponseField name="image_tag" type="string">
+      镜像标签
+    </ResponseField>
+    
+    <ResponseField name="gpu_uuid" type="string">
+      GPU型号UUID
+    </ResponseField>
+    
+    <ResponseField name="gpu_name" type="string">
+      GPU型号名称
+    </ResponseField>
+    
+    <ResponseField name="gpu_nums" type="integer">
+      GPU数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+from datetime import datetime
+
+url = "https://www.chenyu.cn/api/open/v2/instance/info"
+headers = {
+    "Authorization": "Bearer your_api_key"
+}
+
+params = {
+    "instance_uuid": "instance-uuid-123"
+}
+
+response = requests.get(url, headers=headers, params=params)
+result = response.json()
+
+if result['code'] == 0:
+    instance = result['data']
+    create_time = datetime.fromtimestamp(instance['create_time'])
+    
+    print(f"实例详情:")
+    print(f"实例UUID: {instance['instance_uuid']}")
+    print(f"实例名称: {instance['title']}")
+    print(f"实例状态: {instance['status']}")
+    print(f"GPU名称: {instance['gpu_name']}")
+    print(f"GPU数量: {instance['gpu_nums']}")
+    print(f"创建时间: {create_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    if instance['server_url']:
+        print("\n服务访问地址:")
+        for url in instance['server_url']:
+            print(f"  - {url}")
+    
+    if instance['server_map']:
+        print("\n服务详情:")
+        for service in instance['server_map']:
+            print(f"  {service['title']}: {service['url']}")
+            if 'ssh_info' in service:
+                ssh = service['ssh_info']
+                print(f"    SSH连接: ssh {ssh['username']}@{ssh['host']} -p {ssh['port']}")
+else:
+    print(f"查询失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/instance/info';
+const headers = {
+    'Authorization': 'Bearer your_api_key'
+};
+
+const params = {
+    instance_uuid: 'instance-uuid-123'
+};
+
+axios.get(url, { headers, params })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            const instance = result.data;
+            const createTime = new Date(instance.create_time * 1000);
+            
+            console.log('实例详情:');
+            console.log(`实例UUID: ${instance.instance_uuid}`);
+            console.log(`实例名称: ${instance.title}`);
+            console.log(`实例状态: ${instance.status}`);
+            console.log(`GPU名称: ${instance.gpu_name}`);
+            console.log(`GPU数量: ${instance.gpu_nums}`);
+            console.log(`创建时间: ${createTime.toLocaleString()}`);
+            
+            if (instance.server_url.length > 0) {
+                console.log('\n服务访问地址:');
+                instance.server_url.forEach(url => {
+                    console.log(`  - ${url}`);
+                });
+            }
+            
+            if (instance.server_map.length > 0) {
+                console.log('\n服务详情:');
+                instance.server_map.forEach(service => {
+                    console.log(`  ${service.title}: ${service.url}`);
+                    if (service.ssh_info) {
+                        const ssh = service.ssh_info;
+                        console.log(`    SSH连接: ssh ${ssh.username}@${ssh.host} -p ${ssh.port}`);
+                    }
+                });
+            }
+        } else {
+            console.log(`查询失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response?.data);
+    });
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/instance/info?instance_uuid=instance-uuid-123" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "instance_uuid": "instance-uuid-123",
+    "status": 2,
+    "title": "实例标题",
+    "create_time": 1699000000,
+    "start_time": 1699001000,
+    "server_url": ["https://example.com"],
+    "server_map": [
+      {
+        "title": "Web服务",
+        "url": "https://example.com",
+        "port_type": "http",
+        "protocol": "tcp",
+        "ssh_info": {
+          "host": "example.com",
+          "port": 22,
+          "username": "root",
+          "password": "password"
+        }
+      }
+    ],
+    "save_image_status": 3,
+    "charging_type": 1,
+    "shutdown_regular": {
+      "shutdown_time": 0,
+      "enable": false
+    },
+    "image_uuid": "image-uuid-123",
+    "image_name": "pytorch",
+    "image_tag": "2.0",
+    "gpu_uuid": "gpu-uuid-123",
+    "gpu_name": "RTX 4080",
+    "gpu_nums": 1
+  }
+}
+```
+
+## 说明
+
+- 只能查看自己的实例
+- 如果实例已删除或隐藏，返回错误提示
+- `ssh_info` 仅在 `port_type` 为 `ssh` 时存在

@@ -1,0 +1,115 @@
+---
+title: "删除个人镜像"
+api: "POST https://www.chenyu.cn/api/open/v2/image/private/delete"
+description: "删除指定的个人镜像"
+authMethod: "bearer"
+---
+
+# 删除个人镜像
+
+删除用户指定的个人镜像。
+
+<Warning>
+删除操作不可逆，请谨慎操作。删除后镜像数据将无法恢复。
+</Warning>
+
+## 请求参数
+
+<ParamField body="image_uuid" type="string" required>
+  要删除的镜像uuid
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/image/private/delete"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "image_uuid": "img_12345678-1234-1234-1234-123456789012"
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+
+if result['code'] == 0:
+    print("镜像删除成功")
+else:
+    print(f"删除失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/image/private/delete';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+const data = {
+    image_uuid: 'img_12345678-1234-1234-1234-123456789012'
+};
+
+axios.post(url, data, { headers })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            console.log('镜像删除成功');
+        } else {
+            console.log(`删除失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/image/private/delete" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image_uuid": "img_12345678-1234-1234-1234-123456789012"
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<CodeGroup>
+
+```json 成功响应
+{
+  "code": 0,
+  "msg": "删除成功"
+}
+```
+
+```json 失败响应
+{
+  "code": -1,
+  "msg": "镜像不存在或无权限删除"
+}
+```
+
+</CodeGroup>

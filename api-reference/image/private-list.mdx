@@ -1,0 +1,186 @@
+---
+title: "查询个人镜像"
+api: "GET https://www.chenyu.cn/api/open/v2/image/private/list"
+description: "查询用户的个人镜像列表"
+authMethod: "bearer"
+---
+
+# 查询个人镜像
+
+获取当前用户的所有个人镜像列表。
+
+## 请求参数
+
+此接口不需要任何请求参数。
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应编码
+  - `0`: 成功
+  - `2`: 未登录
+  - `-2`: 系统异常
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  返回消息，非0显示错误原因
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  返回数据
+  
+  <Expandable title="data">
+    <ResponseField name="image_list" type="array">
+      镜像列表
+      
+      <Expandable title="image_list">
+        <ResponseField name="title" type="string">
+          镜像名称
+        </ResponseField>
+        
+        <ResponseField name="uuid" type="string">
+          镜像uuid
+        </ResponseField>
+        
+        <ResponseField name="remark" type="string">
+          镜像描述
+        </ResponseField>
+        
+        <ResponseField name="layer_count" type="integer">
+          层数
+        </ResponseField>
+        
+        <ResponseField name="size" type="number">
+          镜像大小 GB
+        </ResponseField>
+        
+        <ResponseField name="pod_uuid" type="string">
+          来源pod uuid
+        </ResponseField>
+        
+        <ResponseField name="pod_tag" type="string">
+          来源pod版本
+        </ResponseField>
+        
+        <ResponseField name="save_image_status" type="integer">
+          镜像保存状态
+          - `1`: 上传中
+          - `2`: 上传成功
+          - `3`: 上传失败
+        </ResponseField>
+        
+        <ResponseField name="create_time" type="integer">
+          镜像创建时间，秒级时间戳
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      总记录数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+from datetime import datetime
+
+url = "https://www.chenyu.cn/api/open/v2/image/private/list"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+response = requests.get(url, headers=headers)
+result = response.json()
+
+if result['code'] == 0:
+    print(f"总共有 {result['data']['total']} 个个人镜像")
+    
+    for image in result['data']['image_list']:
+        status_map = {1: "上传中", 2: "上传成功", 3: "上传失败"}
+        create_time = datetime.fromtimestamp(image['create_time'])
+        
+        print(f"镜像名称: {image['title']}")
+        print(f"描述: {image['remark']}")
+        print(f"大小: {image['size']} GB")
+        print(f"状态: {status_map.get(image['save_image_status'], '未知')}")
+        print(f"创建时间: {create_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print("---")
+else:
+    print(f"查询失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/image/private/list';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+axios.get(url, { headers })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            console.log(`总共有 ${result.data.total} 个个人镜像`);
+            
+            const statusMap = {1: "上传中", 2: "上传成功", 3: "上传失败"};
+            
+            result.data.image_list.forEach(image => {
+                const createTime = new Date(image.create_time * 1000);
+                
+                console.log(`镜像名称: ${image.title}`);
+                console.log(`描述: ${image.remark}`);
+                console.log(`大小: ${image.size} GB`);
+                console.log(`状态: ${statusMap[image.save_image_status] || '未知'}`);
+                console.log(`创建时间: ${createTime.toLocaleString()}`);
+                console.log('---');
+            });
+        } else {
+            console.log(`查询失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/image/private/list" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "image_list": [
+      {
+        "title": "我的PyTorch环境",
+        "uuid": "img_12345678-1234-1234-1234-123456789012",
+        "remark": "基于PyTorch 2.0的深度学习环境，已安装常用库",
+        "layer_count": 15,
+        "size": 12.5,
+        "pod_uuid": "pod_87654321-4321-4321-4321-210987654321",
+        "pod_tag": "v2.0",
+        "save_image_status": 2,
+        "create_time": 1703145600
+      }
+    ],
+    "total": 1
+  }
+}
+```

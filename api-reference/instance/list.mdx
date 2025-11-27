@@ -1,0 +1,346 @@
+---
+title: "查询实例列表"
+api: "GET https://www.chenyu.cn/api/open/v2/instance/list"
+description: "查询用户的实例列表"
+authMethod: "bearer"
+---
+
+# 查询实例列表
+
+获取当前用户的所有实例列表，支持分页查询。
+
+<Info>
+  **在线测试**: 您可以在右侧的API Playground中输入您的API Key，然后点击"Try it"按钮直接测试这个接口。API Key格式为 `Bearer your_api_key`。
+</Info>
+
+## 请求参数
+
+此接口不需要任何请求参数。
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  返回数据
+  
+  <Expandable title="data">
+    <ResponseField name="instance_list" type="array">
+      实例列表
+      
+      <Expandable title="instance_list">
+        <ResponseField name="instance_uuid" type="string">
+          实例uuid
+        </ResponseField>
+        
+        <ResponseField name="status" type="integer">
+          实例状态
+          - `2`: 运行中
+          - `21`: 关机中
+          - `22`: 已关机
+          - `24`: 开机中
+          - `27`: 重启中
+        </ResponseField>
+        
+        <ResponseField name="title" type="string">
+          实例名称
+        </ResponseField>
+        
+        <ResponseField name="create_time" type="integer">
+          实例创建时间，秒级时间戳
+        </ResponseField>
+        
+        <ResponseField name="start_time" type="integer">
+          实例启动时间，秒级时间戳
+        </ResponseField>
+        
+        <ResponseField name="server_url" type="array">
+          开放服务url列表
+        </ResponseField>
+
+        <ResponseField name="server_map" type="array">
+          服务映射列表，包含详细的服务信息
+
+          <Expandable title="server_map">
+            <ResponseField name="title" type="string">
+              服务标题
+            </ResponseField>
+
+            <ResponseField name="url" type="string">
+              服务访问地址
+            </ResponseField>
+
+            <ResponseField name="port_type" type="string">
+              端口类型
+              - `http`: http
+              - `ssh`: ssh
+            </ResponseField>
+
+            <ResponseField name="protocol" type="string">
+              协议
+              - `tcp`
+              - `udp`
+            </ResponseField>
+
+            <ResponseField name="ssh_info" type="object">
+              SSH连接信息（当port_type为ssh时提供）
+
+              <Expandable title="ssh_info">
+                <ResponseField name="host" type="string">
+                  主机地址
+                </ResponseField>
+
+                <ResponseField name="port" type="integer">
+                  端口
+                </ResponseField>
+
+                <ResponseField name="username" type="string">
+                  SSH用户名
+                </ResponseField>
+
+                <ResponseField name="password" type="string">
+                  SSH密码
+                </ResponseField>
+              </Expandable>
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+
+        <ResponseField name="save_image_status" type="integer">
+          实例镜像保存状态
+          - `1`: 上传中
+          - `2`: 上传成功
+          - `3`: 上传失败
+        </ResponseField>
+        
+        <ResponseField name="charging_type" type="integer">
+          计费类型
+        </ResponseField>
+        
+        <ResponseField name="shutdown_regular" type="object">
+          定时关机设置
+          
+          <Expandable title="shutdown_regular">
+            <ResponseField name="shutdown_time" type="integer">
+              关机时间，秒级时间戳
+            </ResponseField>
+            
+            <ResponseField name="enable" type="boolean">
+              是否启用定时关机
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+        
+        <ResponseField name="image_uuid" type="string">
+          实例使用的镜像uuid
+        </ResponseField>
+        
+        <ResponseField name="image_name" type="string">
+          实例使用的镜像名称
+        </ResponseField>
+        
+        <ResponseField name="image_tag" type="string">
+          实例使用的镜像tag
+        </ResponseField>
+        
+        <ResponseField name="gpu_uuid" type="string">
+          实例使用的gpu uuid
+        </ResponseField>
+        
+        <ResponseField name="gpu_name" type="string">
+          实例使用的gpu名称
+        </ResponseField>
+        
+        <ResponseField name="gpu_nums" type="integer">
+          实例使用的gpu数量
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      总记录数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+from datetime import datetime
+
+url = "https://www.chenyu.cn/api/open/v2/instance/list"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+params = {
+    "page": 1,
+    "page_size": 10
+}
+
+response = requests.get(url, headers=headers, params=params)
+result = response.json()
+
+if result['code'] == 0:
+    print(f"总共有 {result['data']['total']} 个实例")
+    
+    for instance in result['data']['instance_list']:
+        create_time = datetime.fromtimestamp(instance['create_time'])
+        
+        print(f"实例名称: {instance['title']}")
+        print(f"实例UUID: {instance['instance_uuid']}")
+        print(f"状态: {instance['status']}")
+        print(f"GPU: {instance['gpu_name']} x{instance['gpu_nums']}")
+        print(f"镜像: {instance['image_name']}")
+        print(f"创建时间: {create_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        if instance['server_url']:
+            print("服务地址:")
+            for url in instance['server_url']:
+                print(f"  - {url}")
+
+        if instance.get('server_map'):
+            print("服务详情:")
+            for service in instance['server_map']:
+                print(f"  - {service['title']}: {service['url']}")
+                if service.get('ssh_info'):
+                    ssh = service['ssh_info']
+                    print(f"    SSH连接: {ssh['username']}@{ssh['host']}:{ssh['port']}")
+        print("---")
+else:
+    print(f"查询失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/instance/list';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+const params = {
+    page: 1,
+    page_size: 10
+};
+
+axios.get(url, { headers, params })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            console.log(`总共有 ${result.data.total} 个实例`);
+            
+            result.data.instance_list.forEach(instance => {
+                const createTime = new Date(instance.create_time * 1000);
+                
+                console.log(`实例名称: ${instance.title}`);
+                console.log(`实例UUID: ${instance.instance_uuid}`);
+                console.log(`状态: ${instance.status}`);
+                console.log(`GPU: ${instance.gpu_name} x${instance.gpu_nums}`);
+                console.log(`镜像: ${instance.image_name}`);
+                console.log(`创建时间: ${createTime.toLocaleString()}`);
+                
+                if (instance.server_url.length > 0) {
+                    console.log('服务地址:');
+                    instance.server_url.forEach(url => {
+                        console.log(`  - ${url}`);
+                    });
+                }
+
+                if (instance.server_map && instance.server_map.length > 0) {
+                    console.log('服务详情:');
+                    instance.server_map.forEach(service => {
+                        console.log(`  - ${service.title}: ${service.url}`);
+                        if (service.ssh_info) {
+                            const ssh = service.ssh_info;
+                            console.log(`    SSH连接: ${ssh.username}@${ssh.host}:${ssh.port}`);
+                        }
+                    });
+                }
+                console.log('---');
+            });
+        } else {
+            console.log(`查询失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/instance/list?page=1&page_size=10" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "instance_list": [
+      {
+        "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+        "status": 2,
+        "title": "我的PyTorch实例",
+        "create_time": 1703145600,
+        "start_time": 1703145660,
+        "server_url": [
+          "https://jupyter-inst123.chenyu.cn",
+          "https://ssh-inst123.chenyu.cn"
+        ],
+        "server_map": [
+          {
+            "title": "Jupyter Lab",
+            "url": "https://jupyter-inst123.chenyu.cn",
+            "port_type": "http",
+            "protocol": "tcp"
+          },
+          {
+            "title": "SSH Terminal",
+            "url": "ssh://ssh-inst123.chenyu.cn:22",
+            "port_type": "ssh",
+            "protocol": "tcp",
+            "ssh_info": {
+              "host": "inst12345678123412341234123456789012.gzxx.chenyu.cn",
+              "port": 22001,
+              "username": "root",
+              "password": "generated_password_123"
+            }
+          }
+        ],
+        "save_image_status": 2,
+        "charging_type": 1,
+        "shutdown_regular": {
+          "shutdown_time": 1703232000,
+          "enable": true
+        },
+        "image_uuid": "img_87654321-4321-4321-4321-210987654321",
+        "image_name": "PyTorch 2.0 环境",
+        "image_tag": "v2.0",
+        "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
+        "gpu_name": "NVIDIA RTX 4090",
+        "gpu_nums": 1
+      }
+    ],
+    "total": 1
+  }
+}
+```

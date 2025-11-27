@@ -1,0 +1,332 @@
+/* 修复代码块在亮色模式下的显示问题 - 简洁美观版本 */
+
+/* 全局代码块修复 - 无边框，简洁美观 */
+[data-theme="light"] pre,
+[data-theme="light"] code,
+[data-theme="light"] .code-block,
+[data-theme="light"] .highlight,
+[data-theme="light"] .code-group pre,
+[data-theme="light"] .response-example,
+[data-theme="light"] .json-response,
+[data-theme="light"] .api-playground pre,
+[data-theme="light"] .code-snippet,
+[data-theme="light"] .code-example,
+[data-theme="light"] .api-code,
+[data-theme="light"] .endpoint-code {
+  color: #24292f !important;
+  background-color: #f6f8fa !important;
+  border: none !important;
+  border-radius: 6px !important;
+}
+
+/* pre 标签内的 code 元素 */
+[data-theme="light"] pre code,
+[data-theme="light"] .code-block code,
+[data-theme="light"] .code-group code {
+  color: #24292f !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* 内联代码样式 */
+[data-theme="light"] code:not(pre code) {
+  color: #cf222e !important;
+  background-color: #f6f8fa !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 3px !important;
+  border: none !important;
+}
+
+/* 强制覆盖所有可能的代码元素 */
+[data-theme="light"] pre,
+[data-theme="light"] pre *:not(.token),
+[data-theme="light"] code:not(.token) {
+  color: #24292f !important;
+}
+
+/* 修复语法高亮在亮色模式下的颜色 - GitHub 风格 */
+[data-theme="light"] .token.comment,
+[data-theme="light"] .token.prolog,
+[data-theme="light"] .token.doctype,
+[data-theme="light"] .token.cdata {
+  color: #6e7781 !important;
+  font-style: italic !important;
+}
+
+[data-theme="light"] .token.punctuation {
+  color: #24292f !important;
+}
+
+[data-theme="light"] .token.property,
+[data-theme="light"] .token.tag,
+[data-theme="light"] .token.boolean,
+[data-theme="light"] .token.number,
+[data-theme="light"] .token.constant,
+[data-theme="light"] .token.symbol,
+[data-theme="light"] .token.deleted {
+  color: #0550ae !important;
+}
+
+[data-theme="light"] .token.selector,
+[data-theme="light"] .token.attr-name,
+[data-theme="light"] .token.string,
+[data-theme="light"] .token.char,
+[data-theme="light"] .token.builtin,
+[data-theme="light"] .token.inserted {
+  color: #0a3069 !important;
+}
+
+[data-theme="light"] .token.operator,
+[data-theme="light"] .token.entity,
+[data-theme="light"] .token.url,
+[data-theme="light"] .language-css .token.string,
+[data-theme="light"] .style .token.string {
+  color: #cf222e !important;
+}
+
+[data-theme="light"] .token.atrule,
+[data-theme="light"] .token.attr-value,
+[data-theme="light"] .token.keyword {
+  color: #cf222e !important;
+  font-weight: bold !important;
+}
+
+[data-theme="light"] .token.function,
+[data-theme="light"] .token.class-name {
+  color: #8250df !important;
+}
+
+[data-theme="light"] .token.regex,
+[data-theme="light"] .token.important,
+[data-theme="light"] .token.variable {
+  color: #0550ae !important;
+}
+
+/* JSON 特殊处理 */
+[data-theme="light"] .language-json .token.property {
+  color: #0550ae !important;
+}
+
+[data-theme="light"] .language-json .token.string {
+  color: #0a3069 !important;
+}
+
+/* 修复 curl 命令的显示 */
+[data-theme="light"] .language-bash .token.function {
+  color: #cf222e !important;
+}
+
+[data-theme="light"] .language-bash .token.string {
+  color: #0a3069 !important;
+}
+
+/* 联系支持弹框样式 - 修复版本 */
+.support-modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+.support-modal.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* 浅色模式样式 */
+.modal-content {
+  background: var(--background-color, #ffffff);
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  position: relative;
+  animation: slideIn 0.2s ease-out;
+  border: 1px solid var(--border-color, #e5e7eb);
+  overflow: hidden;
+}
+
+/* 深色模式样式 */
+[data-theme="dark"] .modal-content,
+html[data-theme="dark"] .modal-content,
+.dark .modal-content {
+  background: var(--background-color-dark, #1f2937) !important;
+  border: 1px solid var(--border-color-dark, #374151) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3) !important;
+}
+
+.modal-header {
+  padding: 32px 32px 0 32px;
+  margin-bottom: 24px;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text-primary, #111827);
+  letter-spacing: -0.025em;
+}
+
+/* 深色模式标题 */
+[data-theme="dark"] .modal-title,
+html[data-theme="dark"] .modal-title,
+.dark .modal-title {
+  color: var(--text-primary-dark, #ffffff) !important;
+}
+
+.modal-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 深色模式副标题 */
+[data-theme="dark"] .modal-subtitle,
+html[data-theme="dark"] .modal-subtitle,
+.dark .modal-subtitle {
+  color: var(--text-secondary-dark, #d1d5db) !important;
+}
+
+.qr-code-container {
+  padding: 0 32px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-code-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  object-fit: cover;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: block;
+  margin: 0 auto;
+}
+
+/* 深色模式二维码 */
+[data-theme="dark"] .qr-code-image,
+html[data-theme="dark"] .qr-code-image,
+.dark .qr-code-image {
+  border-color: var(--border-color-dark, #4b5563) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modal-footer {
+  background: var(--background-secondary, #f9fafb);
+  padding: 20px 32px 32px 32px;
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+/* 深色模式底部 */
+[data-theme="dark"] .modal-footer,
+html[data-theme="dark"] .modal-footer,
+.dark .modal-footer {
+  background: var(--background-secondary-dark, #111827) !important;
+  color: var(--text-secondary-dark, #d1d5db) !important;
+  border-top: 1px solid var(--border-color-dark, #374151) !important;
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--button-background, #f3f4f6);
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text-secondary, #6b7280);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-weight: 500;
+}
+
+.close-button:hover {
+  background: var(--button-background-hover, #e5e7eb);
+  color: var(--text-primary, #374151);
+  transform: scale(1.05);
+}
+
+/* 深色模式关闭按钮 */
+[data-theme="dark"] .close-button,
+html[data-theme="dark"] .close-button,
+.dark .close-button {
+  background: var(--button-background-dark, #374151) !important;
+  color: var(--text-secondary-dark, #d1d5db) !important;
+}
+
+[data-theme="dark"] .close-button:hover,
+html[data-theme="dark"] .close-button:hover,
+.dark .close-button:hover {
+  background: var(--button-background-hover-dark, #4b5563) !important;
+  color: var(--text-primary-dark, #ffffff) !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 480px) {
+  .modal-content {
+    margin: 16px;
+    border-radius: 12px;
+  }
+
+  .modal-header {
+    padding: 24px 24px 0 24px;
+    margin-bottom: 20px;
+  }
+
+  .qr-code-container {
+    padding: 0 24px;
+    margin-bottom: 20px;
+  }
+
+  .qr-code-image {
+    width: 180px;
+    height: 180px;
+  }
+
+  .modal-footer {
+    padding: 16px 24px 24px 24px;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+  }
+}

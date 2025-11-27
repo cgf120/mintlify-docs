@@ -1,0 +1,222 @@
+---
+title: "查询算力市场镜像"
+api: "GET https://www.chenyu.cn/api/open/v2/image/market/list"
+description: "查询算力市场中可用的镜像列表"
+authMethod: "none"
+---
+
+# 查询算力市场镜像
+
+获取算力市场中所有可用的镜像列表。
+
+<Info>
+  **无需认证**: 此接口为公开接口，无需提供API Key即可访问。
+</Info>
+
+## 请求参数
+
+<ParamField query="page" type="integer">
+  页码，从1开始
+</ParamField>
+
+<ParamField query="page_size" type="integer">
+  每页数量
+</ParamField>
+
+<ParamField query="cuda_version" type="string">
+  CUDA版本，如：11.8.0等
+</ParamField>
+
+<ParamField query="python_version" type="string">
+  Python版本，如：3.8、3.9、3.10等
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  返回数据
+
+  <Expandable title="data">
+    <ResponseField name="image_list" type="array">
+      镜像列表
+
+      <Expandable title="image_list">
+        <ResponseField name="uuid" type="string">
+          镜像UUID
+        </ResponseField>
+
+        <ResponseField name="components" type="object">
+          组件版本信息
+
+          <Expandable title="components">
+            <ResponseField name="CUDA" type="string">
+              CUDA版本
+            </ResponseField>
+
+            <ResponseField name="PaddlePaddle" type="string">
+              PaddlePaddle版本
+            </ResponseField>
+
+            <ResponseField name="PyTorch" type="string">
+              PyTorch版本
+            </ResponseField>
+
+            <ResponseField name="Python" type="string">
+              Python版本
+            </ResponseField>
+
+            <ResponseField name="TensorFlow" type="string">
+              TensorFlow版本
+            </ResponseField>
+
+            <ResponseField name="Ubuntu" type="string">
+              Ubuntu版本
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+
+        <ResponseField name="size" type="integer">
+          镜像大小（字节）
+        </ResponseField>
+
+        <ResponseField name="created_at" type="integer">
+          创建时间戳
+        </ResponseField>
+
+        <ResponseField name="updated_at" type="integer">
+          更新时间戳
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="total" type="integer">
+      总记录数
+    </ResponseField>
+
+    <ResponseField name="page" type="integer">
+      当前页码
+    </ResponseField>
+
+    <ResponseField name="page_size" type="integer">
+      每页数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/image/market/list"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+params = {
+    "page": 1,
+    "page_size": 20,
+    "cuda_version": "11.8",
+    "python_version": "3.9"
+}
+
+response = requests.get(url, headers=headers, params=params)
+result = response.json()
+
+print("算力市场镜像列表:")
+print(f"总数: {result['data']['total']}, 当前页: {result['data']['page']}")
+for image in result['data']['image_list']:
+    print(f"UUID: {image['uuid']}")
+    print(f"CUDA版本: {image['components']['CUDA']}")
+    print(f"Python版本: {image['components']['Python']}")
+    print(f"PyTorch版本: {image['components']['PyTorch']}")
+    print(f"TensorFlow版本: {image['components']['TensorFlow']}")
+    print(f"镜像大小: {image['size']} 字节")
+    print("---")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/image/market/list';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+const params = {
+    page: 1,
+    page_size: 20,
+    cuda_version: '11.8',
+    python_version: '3.9'
+};
+
+axios.get(url, { headers, params })
+    .then(response => {
+        const data = response.data.data;
+        console.log('算力市场镜像列表:');
+        console.log(`总数: ${data.total}, 当前页: ${data.page}`);
+
+        data.image_list.forEach(image => {
+            console.log(`UUID: ${image.uuid}`);
+            console.log(`CUDA版本: ${image.components.CUDA}`);
+            console.log(`Python版本: ${image.components.Python}`);
+            console.log(`PyTorch版本: ${image.components.PyTorch}`);
+            console.log(`TensorFlow版本: ${image.components.TensorFlow}`);
+            console.log(`镜像大小: ${image.size} 字节`);
+            console.log('---');
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/image/market/list?page=1&page_size=20&cuda_version=11.8&python_version=3.9" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "image_list": [
+      {
+        "uuid": "ceb70da2df074c9e99905b6a4f4db032",
+        "components": {
+          "CUDA": "11.8.0",
+          "PaddlePaddle": "2.5.2",
+          "PyTorch": "2.1.2",
+          "Python": "3.10",
+          "TensorFlow": "2.16.2",
+          "Ubuntu": "22.04"
+        },
+        "size": 19372840210,
+        "created_at": 1743213028,
+        "updated_at": 1743215603
+      }
+    ],
+    "total": 84,
+    "page": 1,
+    "page_size": 1
+  }
+}
+```

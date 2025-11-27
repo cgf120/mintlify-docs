@@ -1,0 +1,315 @@
+---
+title: "API 认证"
+description: "如何安全地使用晨羽智云API"
+icon: "key"
+---
+
+# API 认证
+
+晨羽智云API使用API Key进行认证，确保您的账户和资源安全。本指南将详细介绍如何获取、使用和管理API Key。
+
+<Info>
+  **在线API测试功能**: 本文档支持在线API测试！在任何API页面的右侧，您都可以找到API Playground，输入您的API Key后即可直接测试接口，无需编写代码。
+</Info>
+
+## 获取API Key
+
+### 1. 登录控制台
+
+访问 [晨羽智云控制台](https://www.chenyu.cn/console/apiServer) 并使用您的账户登录。
+
+### 2. 创建API Key
+
+<Steps>
+  <Step title="进入API管理">
+    在控制台左侧导航栏中，点击"API管理"菜单
+  </Step>
+  <Step title="创建新密钥">
+    点击"创建API Key"按钮
+  </Step>
+  <Step title="配置权限">
+    根据需要设置API Key的权限范围
+  </Step>
+  <Step title="保存密钥">
+    复制生成的API Key并妥善保存
+  </Step>
+</Steps>
+
+<Warning>
+  **重要提醒** - 请妥善保管您的API Key，切勿泄露。
+</Warning>
+
+## 使用API Key
+
+### 认证方式
+
+在所有API请求中，需要在HTTP头中包含认证信息：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+### 完整请求示例
+
+<CodeGroup>
+
+```bash cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/balance/info" \
+  -H "Authorization: Bearer cy_1234567890abcdef1234567890abcdef" \
+  -H "Content-Type: application/json"
+```
+
+```python Python
+import requests
+
+headers = {
+    "Authorization": "Bearer cy_1234567890abcdef1234567890abcdef",
+    "Content-Type": "application/json"
+}
+
+response = requests.get("https://www.chenyu.cn/api/open/v2/balance/info", headers=headers)
+print(response.json())
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const headers = {
+    'Authorization': 'Bearer cy_1234567890abcdef1234567890abcdef',
+    'Content-Type': 'application/json'
+};
+
+axios.get('https://www.chenyu.cn/api/open/v2/balance/info', { headers })
+    .then(response => console.log(response.data))
+    .catch(error => console.error(error));
+```
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "io"
+    "net/http"
+)
+
+func main() {
+    req, _ := http.NewRequest("GET", "https://www.chenyu.cn/api/open/v2/balance/info", nil)
+    req.Header.Set("Authorization", "Bearer cy_1234567890abcdef1234567890abcdef")
+    req.Header.Set("Content-Type", "application/json")
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    body, _ := io.ReadAll(resp.Body)
+    fmt.Println(string(body))
+}
+```
+
+</CodeGroup>
+
+## 在线API测试
+
+### 使用API Playground
+
+本文档集成了强大的API Playground功能，让您无需编写代码即可测试所有API接口：
+
+<Steps>
+  <Step title="访问API页面">
+    导航到任何API接口页面（如"余额查询"、"实例列表"等）
+  </Step>
+  <Step title="找到API Playground">
+    在页面右侧或底部找到"API Playground"区域
+  </Step>
+  <Step title="输入API Key">
+    在"Authorization"输入框中输入您的API Key，格式为：`Bearer your_api_key`
+  </Step>
+  <Step title="设置参数">
+    根据需要填写查询参数或请求体参数
+  </Step>
+  <Step title="发送请求">
+    点击"Try it"按钮发送请求，查看实时响应结果
+  </Step>
+</Steps>
+
+### 测试示例
+
+<Tabs>
+  <Tab title="GET请求示例">
+    **测试余额查询接口**:
+    1. 访问"余额查询"页面
+    2. 在Authorization输入框中输入：`Bearer sk-xxx...`
+    3. 点击"Try it"按钮
+    4. 查看返回的余额信息
+  </Tab>
+
+  <Tab title="POST请求示例">
+    **测试创建实例接口**:
+    1. 访问"创建实例"页面
+    2. 输入API Key：`Bearer sk-xxx...`
+    3. 填写请求参数（pod_uuid、gpu_uuid等）
+    4. 点击"Try it"发送请求
+    5. 查看实例创建结果
+  </Tab>
+</Tabs>
+
+<Warning>
+  **安全提醒**: 在公共环境中使用API Playground时，请注意保护您的API Key安全。测试完成后建议清除输入框中的API Key。
+</Warning>
+
+## 安全最佳实践
+
+### API Key管理
+
+<AccordionGroup>
+  <Accordion title="安全存储" icon="shield">
+    - **环境变量**: 将API Key存储在环境变量中，不要硬编码到代码中
+    - **密钥管理**: 使用专业的密钥管理系统（如AWS KMS、Azure Key Vault）
+    - **版本控制**: 确保API Key不会意外提交到版本控制系统
+    - **容器化**: 在容器环境中使用Secrets管理API Key
+    
+    ```bash
+    # 设置环境变量
+    export CHENYU_API_KEY="cy_1234567890abcdef1234567890abcdef"
+    
+    # 在代码中使用
+    import os
+    api_key = os.getenv('CHENYU_API_KEY')
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### 安全事件响应
+
+如果发现API Key可能被泄露或滥用，请立即采取以下措施：
+
+<Steps>
+  <Step title="立即禁用">
+    在控制台中立即禁用或删除相关的API Key
+  </Step>
+  <Step title="创建新密钥">
+    创建新的API Key，并更新应用配置
+  </Step>
+  <Step title="联系支持">
+    如有必要，联系技术支持团队进行进一步调查
+  </Step>
+</Steps>
+
+## 认证错误处理
+
+### 常见错误
+
+<Tabs>
+  <Tab title="401 Unauthorized">
+    **错误原因**:
+    - API Key无效或已过期
+    - 请求头格式错误
+    - API Key被禁用
+    
+    **解决方案**:
+    ```python
+    # 检查API Key格式
+    if not api_key.startswith('cy_'):
+        raise ValueError("Invalid API key format")
+    
+    # 检查请求头
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    ```
+  </Tab>
+
+  <Tab title="429 Too Many Requests">
+    **错误原因**:
+    - 请求频率超过限制
+    - 并发请求过多
+    
+    **解决方案**:
+    ```python
+    import time
+    
+    def api_call_with_retry(func, max_retries=3):
+        for attempt in range(max_retries):
+            try:
+                return func()
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 429:
+                    # 从响应头获取重试时间
+                    retry_after = int(e.response.headers.get('Retry-After', 60))
+                    time.sleep(retry_after)
+                else:
+                    raise
+    ```
+  </Tab>
+</Tabs>
+
+## 环境配置
+
+### 开发环境
+
+```python
+# development.py
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+CHENYU_API_KEY = os.getenv('CHENYU_API_KEY_DEV')
+CHENYU_BASE_URL = 'https://www.chenyu.cn/api/open/v2'
+```
+
+### 生产环境
+
+```python
+# production.py
+import os
+
+# 从环境变量或密钥管理系统获取
+CHENYU_API_KEY = os.getenv('CHENYU_API_KEY_PROD')
+CHENYU_BASE_URL = 'https://www.chenyu.cn/api/open/v2'
+
+# 生产环境额外配置
+TIMEOUT = 30
+MAX_RETRIES = 3
+```
+
+## 测试API Key
+
+创建API Key后，可以使用以下命令测试其是否正常工作：
+
+```bash
+# 测试API Key是否有效
+curl -X GET "https://www.chenyu.cn/api/open/v2/balance/info" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json"
+```
+
+成功响应示例：
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "balance": 1000.50,
+    "card_balance": 500.00
+  }
+}
+```
+
+---
+
+<Info>
+  **安全提醒** - API Key具有访问您账户资源的权限，请务必妥善保管。如有任何安全疑问，请及时联系技术支持团队。
+</Info>
+
+## 相关资源
+
+- [快速开始](/userguide/quickstart) - 了解如何快速开始使用API
+- [API参考](/api-reference/introduction) - 查看完整的API文档
+- [功能介绍](/userguide/introduction) - 深入了解平台功能
+- [技术支持](mailto:support@chenyu.com) - 获取专业技术支持

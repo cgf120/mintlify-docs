@@ -1,0 +1,190 @@
+---
+title: "查询应用市场Pod"
+api: "GET https://www.chenyu.cn/api/open/v2/pod/list"
+description: "查询应用市场中可用的Pod列表"
+authMethod: "none"
+---
+
+# 查询应用市场Pod
+
+获取应用市场中所有可用的Pod列表，支持分页查询和按名称筛选。
+
+<Info>
+  **无需认证**: 此接口为公开接口，无需提供API Key即可访问。
+</Info>
+
+## 请求参数
+
+<ParamField query="page" type="integer" optional>
+  页码，从1开始
+</ParamField>
+
+<ParamField query="page_size" type="integer" optional>
+  每页数量
+</ParamField>
+
+<ParamField query="name" type="string" optional>
+  Pod名称，支持模糊搜索
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应状态码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应消息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  返回数据
+  
+  <Expandable title="data">
+    <ResponseField name="pod_list" type="array">
+      Pod列表
+      
+      <Expandable title="pod_list">
+        <ResponseField name="title" type="string">
+          Pod名称
+        </ResponseField>
+        
+        <ResponseField name="uuid" type="string">
+          Pod uuid
+        </ResponseField>
+        
+        <ResponseField name="remark" type="string">
+          Pod描述
+        </ResponseField>
+        
+        <ResponseField name="pod_tag" type="array">
+          Pod版本标签列表
+        </ResponseField>
+        
+        <ResponseField name="price" type="object">
+          价格信息
+          
+          <Expandable title="price">
+            <ResponseField name="hour" type="number" required>
+              按小时定价
+            </ResponseField>
+            
+            <ResponseField name="day" type="number">
+              按天定价
+            </ResponseField>
+            
+            <ResponseField name="week" type="number">
+              按周定价
+            </ResponseField>
+            
+            <ResponseField name="month" type="number">
+              按月定价
+            </ResponseField>
+            
+            <ResponseField name="year" type="number">
+              按年定价
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      总记录数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/pod/list"
+headers = {
+    "Content-Type": "application/json"
+}
+
+params = {
+    "page": 1,
+    "page_size": 10,
+    "name": "pytorch"
+}
+
+response = requests.get(url, headers=headers, params=params)
+result = response.json()
+
+print(f"总共找到 {result['data']['total']} 个Pod")
+for pod in result['data']['pod_list']:
+    print(f"Pod名称: {pod['title']}")
+    print(f"描述: {pod['remark']}")
+    print(f"按小时价格: {pod['price']['hour']} 元")
+    print("---")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/pod/list';
+const headers = {
+    'Content-Type': 'application/json'
+};
+
+const params = {
+    page: 1,
+    page_size: 10,
+    name: 'pytorch'
+};
+
+axios.get(url, { headers, params })
+    .then(response => {
+        const data = response.data.data;
+        console.log(`总共找到 ${data.total} 个Pod`);
+
+        data.pod_list.forEach(pod => {
+            console.log(`Pod名称: ${pod.title}`);
+            console.log(`描述: ${pod.remark}`);
+            console.log(`按小时价格: ${pod.price.hour} 元`);
+            console.log('---');
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/pod/list?page=1&page_size=10&name=pytorch" \
+  -H "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "pod_list": [
+      {
+        "title": "PyTorch 深度学习环境",
+        "uuid": "pod_12345678-1234-1234-1234-123456789012",
+        "remark": "预装PyTorch 2.0，支持CUDA 11.8，适合深度学习训练",
+        "pod_tag": ["v1.0", "v1.1", "v2.0"],
+        "price": {
+          "hour": 2.5,
+          "day": 50.0,
+          "week": 300.0,
+          "month": 1200.0,
+          "year": 12000.0
+        }
+      }
+    ],
+    "total": 1
+  }
+}
+```
