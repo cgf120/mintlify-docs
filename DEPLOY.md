@@ -97,7 +97,7 @@ chenyu-api-docs/
 - ✅ 一命令部署 (`./deploy.sh`)
 - ✅ 自动健康检查
 - ✅ 支持热更新
-- ✅ 轻量级镜像 (node:18-alpine)
+- ✅ 轻量级镜像 (node:20.17-alpine)
 - ✅ HTTP服务 (端口3000)
 
 ## 🌐 访问地址
