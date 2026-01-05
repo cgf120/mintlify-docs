@@ -78,7 +78,7 @@ docker-compose up --build # 重新构建
 
 **文档不显示**
 ```bash
-cat mint.json              # 检查配置
+cat docs.json              # 检查配置
 docker-compose restart docs # 重启服务
 ```
 
@@ -89,7 +89,7 @@ chenyu-api-docs/
 ├── Dockerfile           # Docker镜像配置
 ├── docker-compose.yml   # 容器编排配置  
 ├── deploy.sh           # 一键部署脚本
-└── mint.json           # Mintlify配置
+└── docs.json           # Mintlify配置
 ```
 
 ## 🎯 特性
