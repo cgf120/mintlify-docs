@@ -81,6 +81,7 @@
               "api-reference/instance/shutdown",
               "api-reference/instance/restart",
               "api-reference/instance/set-shutdown-timer",
+              "api-reference/instance/set-idle-close",
               "api-reference/instance/update-title",
               "api-reference/instance/destroy",
               "api-reference/instance/save-image"
