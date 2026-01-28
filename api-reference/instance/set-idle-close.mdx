@@ -1,0 +1,127 @@
+---
+title: "设置空闲关机(未上线)"
+api: "POST https://www.chenyu.cn/api/open/v2/instance/set_idle_close"
+description: "设置实例空闲关机"
+authMethod: "bearer"
+---
+
+# 设置空闲关机
+
+为指定实例设置空闲关机功能，可以在实例空闲一段时间后自动关机。
+
+## 请求参数
+
+<ParamField body="idle_period_minutes" type="integer" required>
+  空闲时间，单位为分钟
+</ParamField>
+
+<ParamField body="instance_uuid" type="string" required>
+  实例uuid
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/instance/set_idle_close"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+
+# 设置空闲60分钟后自动关机
+data = {
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "idle_period_minutes": 60
+}
+
+response = requests.post(url, headers=headers, json=data)
+result = response.json()
+
+if result['code'] == 0:
+    print("空闲关机设置成功")
+else:
+    print(f"设置失败: {result['msg']}")
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const url = 'https://www.chenyu.cn/api/open/v2/instance/set_idle_close';
+const headers = {
+    'Authorization': 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+};
+
+// 设置空闲60分钟后自动关机
+const data = {
+    instance_uuid: 'inst_12345678-1234-1234-1234-123456789012',
+    idle_period_minutes: 60
+};
+
+axios.post(url, data, { headers })
+    .then(response => {
+        const result = response.data;
+        
+        if (result.code === 0) {
+            console.log('空闲关机设置成功');
+        } else {
+            console.log(`设置失败: ${result.msg}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error.response.data);
+    });
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/instance/set_idle_close" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "idle_period_minutes": 60
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<CodeGroup>
+
+```json 成功响应
+{
+  "code": 0,
+  "msg": "设置成功"
+}
+```
+
+```json 失败响应
+{
+  "code": -1,
+  "msg": "实例不存在或状态异常"
+}
+```
+
+</CodeGroup>
+
+## 注意事项
+
+- 空闲关机时间以分钟为单位，只能设置10分钟，30分钟，60分钟，120分钟
+- 设置 `idle_period_minutes` 为 0 可以取消已设置的空闲关机
+- 空闲的标准为：GPU使用率小于10%，且显存使用率小于10%
+
