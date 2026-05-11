@@ -5,7 +5,12 @@
     "description": "",
     "version": "1.0.0"
   },
-  "tags": [],
+  "tags": [
+    {
+      "name": "工作流管理",
+      "description": "工作流市场、运行提交和执行查询接口"
+    }
+  ],
   "paths": {
     "/api/open/v2/pod/list": {
       "get": {
@@ -1785,6 +1790,972 @@
         },
         "security": []
       }
+    },
+    "/api/open/v2/workflow/market/list": {
+      "get": {
+        "summary": "查询工作流市场列表",
+        "deprecated": false,
+        "description": "查询公开发布的工作流列表",
+        "tags": [
+          "工作流管理"
+        ],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "工作流标题关键字",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "标签名称",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "排序方式，默认latest",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "latest",
+                "popular"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码，从1开始",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "每页数量，最大100",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "workflow_id": {
+                                "type": "string",
+                                "description": "工作流ID"
+                              },
+                              "revision_id": {
+                                "type": "string",
+                                "description": "当前发布版本ID"
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "工作流标题"
+                              },
+                              "description": {
+                                "type": "string",
+                                "description": "工作流介绍"
+                              },
+                              "cover_url": {
+                                "type": "string",
+                                "description": "封面地址"
+                              },
+                              "tags": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "owner": {
+                                "type": "object",
+                                "properties": {
+                                  "user_id": {
+                                    "type": "integer",
+                                    "format": "uint64",
+                                    "description": "用户ID"
+                                  },
+                                  "display_name": {
+                                    "type": "string",
+                                    "description": "展示名称"
+                                  }
+                                }
+                              },
+                              "quote_currency": {
+                                "type": "string",
+                                "description": "报价币种"
+                              },
+                              "quote_amount": {
+                                "type": "string",
+                                "description": "预估报价金额，实际结算以运行完成后的实际消耗为准"
+                              },
+                              "may_incur_external_model_cost": {
+                                "type": "boolean",
+                                "description": "是否可能产生第三方模型费用"
+                              },
+                              "updated_at": {
+                                "type": "string",
+                                "description": "更新时间"
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数"
+                        },
+                        "page": {
+                          "type": "integer",
+                          "description": "当前页码"
+                        },
+                        "page_size": {
+                          "type": "integer",
+                          "description": "每页数量"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/open/v2/workflow/market/info": {
+      "get": {
+        "summary": "查询工作流详情",
+        "deprecated": false,
+        "description": "查询公开工作流详情、输入参数清单和输出参数清单",
+        "tags": [
+          "工作流管理"
+        ],
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "query",
+            "description": "工作流ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "workflow_id": {
+                          "type": "string",
+                          "description": "工作流ID"
+                        },
+                        "revision_id": {
+                          "type": "string",
+                          "description": "当前发布版本ID"
+                        },
+                        "title": {
+                          "type": "string",
+                          "description": "工作流标题"
+                        },
+                        "description": {
+                          "type": "string",
+                          "description": "工作流介绍"
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "covers": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "owner": {
+                          "type": "object",
+                          "properties": {
+                            "user_id": {
+                              "type": "integer",
+                              "format": "uint64",
+                              "description": "用户ID"
+                            },
+                            "display_name": {
+                              "type": "string",
+                              "description": "展示名称"
+                            }
+                          }
+                        },
+                        "quote_currency": {
+                          "type": "string",
+                          "description": "报价币种"
+                        },
+                        "quote_amount": {
+                          "type": "string",
+                          "description": "预估报价金额，实际结算以运行完成后的实际消耗为准"
+                        },
+                        "may_incur_external_model_cost": {
+                          "type": "boolean",
+                          "description": "是否可能产生第三方模型费用"
+                        },
+                        "external_cost_notice": {
+                          "type": "string",
+                          "description": "第三方模型费用提示"
+                        },
+                        "editable_parameter_manifest": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        },
+                        "candidate_output_manifest": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/open/v2/workflow/run/submit": {
+      "post": {
+        "summary": "提交工作流运行",
+        "deprecated": false,
+        "description": "提交一次工作流运行任务",
+        "tags": [
+          "工作流管理"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "workflow_id",
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "workflow_id": {
+                    "type": "string",
+                    "description": "工作流ID"
+                  },
+                  "revision_id": {
+                    "type": "string",
+                    "description": "工作流版本ID，不传时使用当前已发布版本"
+                  },
+                  "inputs": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "工作流输入参数"
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "description": "调用方生成的幂等键"
+                  },
+                  "accept_external_cost_risk": {
+                    "type": "boolean",
+                    "description": "是否确认接受第三方模型费用风险"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "run_order_id": {
+                          "type": "string",
+                          "description": "运行订单ID"
+                        },
+                        "workflow_id": {
+                          "type": "string",
+                          "description": "工作流ID"
+                        },
+                        "revision_id": {
+                          "type": "string",
+                          "description": "运行版本ID"
+                        },
+                        "quote_currency": {
+                          "type": "string",
+                          "description": "报价币种"
+                        },
+                        "quote_amount": {
+                          "type": "string",
+                          "description": "预扣费参考报价"
+                        },
+                        "freeze_status": {
+                          "type": "string",
+                          "description": "预扣费状态"
+                        },
+                        "run_status": {
+                          "type": "string",
+                          "description": "运行状态"
+                        },
+                        "task_id": {
+                          "type": "string",
+                          "description": "执行引擎任务ID"
+                        },
+                        "prompt_id": {
+                          "type": "string",
+                          "description": "执行引擎prompt ID"
+                        },
+                        "billing_run_id": {
+                          "type": "string",
+                          "description": "计费运行ID"
+                        },
+                        "idempotent_replay": {
+                          "type": "boolean",
+                          "description": "是否为幂等重放结果"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/open/v2/workflow/run/list": {
+      "get": {
+        "summary": "查询工作流运行列表",
+        "deprecated": false,
+        "description": "查询当前API Key所属用户的工作流运行记录",
+        "tags": [
+          "工作流管理"
+        ],
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "query",
+            "description": "工作流ID",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "运行状态",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码，从1开始",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "每页数量，最大100",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "run_order_id": {
+                                "type": "string",
+                                "description": "运行订单ID"
+                              },
+                              "workflow_id": {
+                                "type": "string",
+                                "description": "工作流ID"
+                              },
+                              "revision_id": {
+                                "type": "string",
+                                "description": "运行版本ID"
+                              },
+                              "title": {
+                                "type": "string",
+                                "description": "工作流标题"
+                              },
+                              "run_status": {
+                                "type": "string",
+                                "description": "运行状态"
+                              },
+                              "quote_amount": {
+                                "type": "string",
+                                "description": "提交时的预估报价"
+                              },
+                              "final_amount": {
+                                "type": "string",
+                                "description": "实际结算金额"
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "description": "创建时间"
+                              }
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer",
+                          "description": "总记录数"
+                        },
+                        "page": {
+                          "type": "integer",
+                          "description": "当前页码"
+                        },
+                        "page_size": {
+                          "type": "integer",
+                          "description": "每页数量"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/open/v2/workflow/run/info": {
+      "get": {
+        "summary": "查询工作流运行详情",
+        "deprecated": false,
+        "description": "查询单次工作流运行订单详情",
+        "tags": [
+          "工作流管理"
+        ],
+        "parameters": [
+          {
+            "name": "run_order_id",
+            "in": "query",
+            "description": "运行订单ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "run_order_id": {
+                          "type": "string",
+                          "description": "运行订单ID"
+                        },
+                        "workflow_id": {
+                          "type": "string",
+                          "description": "工作流ID"
+                        },
+                        "revision_id": {
+                          "type": "string",
+                          "description": "运行版本ID"
+                        },
+                        "caller_user_id": {
+                          "type": "integer",
+                          "format": "uint64",
+                          "description": "调用方用户ID"
+                        },
+                        "owner_user_id": {
+                          "type": "integer",
+                          "format": "uint64",
+                          "description": "工作流所有者用户ID"
+                        },
+                        "token_id": {
+                          "type": "integer",
+                          "format": "uint64",
+                          "description": "API Key ID"
+                        },
+                        "quote_amount": {
+                          "type": "string",
+                          "description": "提交时的预估报价"
+                        },
+                        "quote_currency": {
+                          "type": "string",
+                          "description": "报价币种"
+                        },
+                        "freeze_status": {
+                          "type": "string",
+                          "description": "预扣费状态"
+                        },
+                        "freeze_order_no": {
+                          "type": "string",
+                          "description": "预扣费订单号"
+                        },
+                        "submission_status": {
+                          "type": "string",
+                          "description": "提交状态"
+                        },
+                        "run_status": {
+                          "type": "string",
+                          "description": "运行状态"
+                        },
+                        "settlement_status": {
+                          "type": "string",
+                          "description": "结算状态"
+                        },
+                        "task_id": {
+                          "type": "string",
+                          "description": "执行引擎任务ID"
+                        },
+                        "prompt_id": {
+                          "type": "string",
+                          "description": "执行引擎prompt ID"
+                        },
+                        "billing_run_id": {
+                          "type": "string",
+                          "description": "计费运行ID"
+                        },
+                        "idempotency_key": {
+                          "type": "string",
+                          "description": "幂等键"
+                        },
+                        "upstream_request_id": {
+                          "type": "string",
+                          "description": "上游请求ID"
+                        },
+                        "inputs": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "outputs": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "compute_cost": {
+                          "type": "string",
+                          "description": "计算资源费用"
+                        },
+                        "external_model_cost": {
+                          "type": "string",
+                          "description": "第三方模型费用"
+                        },
+                        "total_cost": {
+                          "type": "string",
+                          "description": "实际总消耗"
+                        },
+                        "final_amount": {
+                          "type": "string",
+                          "description": "实际结算金额"
+                        },
+                        "released_amount": {
+                          "type": "string",
+                          "description": "已释放预扣金额"
+                        },
+                        "error_code": {
+                          "type": "string",
+                          "description": "失败错误码"
+                        },
+                        "error_message": {
+                          "type": "string",
+                          "description": "失败错误信息"
+                        },
+                        "submitted_at": {
+                          "type": "string",
+                          "description": "提交时间"
+                        },
+                        "started_at": {
+                          "type": "string",
+                          "description": "开始执行时间"
+                        },
+                        "terminal_at": {
+                          "type": "string",
+                          "description": "终态时间"
+                        },
+                        "settled_at": {
+                          "type": "string",
+                          "description": "结算时间"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "创建时间"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "更新时间"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/open/v2/workflow/run/execution": {
+      "get": {
+        "summary": "查询工作流执行进度",
+        "deprecated": false,
+        "description": "查询工作流运行的实时进度、日志和输出结果",
+        "tags": [
+          "工作流管理"
+        ],
+        "parameters": [
+          {
+            "name": "run_order_id",
+            "in": "query",
+            "description": "运行订单ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "task_id": {
+                          "type": "string",
+                          "description": "执行引擎任务ID"
+                        },
+                        "workflow_id": {
+                          "type": "string",
+                          "description": "工作流ID"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "执行状态"
+                        },
+                        "queue_info": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "position": {
+                              "type": "integer",
+                              "description": "队列位置"
+                            },
+                            "estimated_wait_sec": {
+                              "type": "integer",
+                              "nullable": true,
+                              "description": "预计等待秒数"
+                            }
+                          }
+                        },
+                        "progress_percent": {
+                          "type": "integer",
+                          "nullable": true,
+                          "description": "执行进度百分比"
+                        },
+                        "progress_snapshot": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "logs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "type": "string",
+                                "description": "日志时间"
+                              },
+                              "event_type": {
+                                "type": "string",
+                                "description": "事件类型"
+                              },
+                              "level": {
+                                "type": "string",
+                                "description": "日志级别"
+                              },
+                              "message": {
+                                "type": "string",
+                                "description": "日志内容"
+                              },
+                              "node_id": {
+                                "type": "string",
+                                "description": "节点ID"
+                              },
+                              "progress_percent": {
+                                "type": "integer",
+                                "nullable": true,
+                                "description": "日志对应进度"
+                              },
+                              "value": {
+                                "type": "integer",
+                                "nullable": true
+                              },
+                              "max": {
+                                "type": "integer",
+                                "nullable": true
+                              },
+                              "fraction": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "actual_execution_duration_sec": {
+                          "type": "number",
+                          "nullable": true,
+                          "description": "实际执行时长，单位秒"
+                        },
+                        "compute_cost": {
+                          "type": "number",
+                          "description": "计算资源费用"
+                        },
+                        "external_model_cost": {
+                          "type": "number",
+                          "description": "第三方模型费用"
+                        },
+                        "total_cost": {
+                          "type": "number",
+                          "description": "实际总消耗"
+                        },
+                        "outputs": {
+                          "type": "object",
+                          "additionalProperties": true
+                        },
+                        "error": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "description": "错误码"
+                            },
+                            "message": {
+                              "type": "string",
+                              "description": "错误信息"
+                            }
+                          }
+                        },
+                        "cancel_requested": {
+                          "type": "boolean",
+                          "description": "是否请求取消"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "创建时间"
+                        },
+                        "started_at": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "开始执行时间"
+                        },
+                        "terminal_at": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "终态时间"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1943,8 +2914,19 @@
         ]
       }
     },
-    "securitySchemes": {}
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API Key，格式：Bearer your_api_key"
+      }
+    }
   },
-  "servers": [],
+  "servers": [
+    {
+      "url": "https://www.chenyu.cn",
+      "description": "生产环境"
+    }
+  ],
   "security": []
 }

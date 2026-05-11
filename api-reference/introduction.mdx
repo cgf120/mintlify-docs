@@ -55,6 +55,9 @@ Authorization: Bearer YOUR_API_KEY
   <Card title="Pod管理" icon="chart-line" href="/api-reference/pod/list">
     获取应用市场Pod列表和相关信息
   </Card>
+  <Card title="工作流管理" icon="sparkles" href="/api-reference/workflow/market-list">
+    查询工作流市场、提交运行任务、获取进度日志和输出结果
+  </Card>
 </CardGroup>
 
 ## 核心功能
@@ -96,6 +99,17 @@ graph LR
 - `GET /api/open/v2/pod/list` - 获取Pod列表
 - `GET /api/open/v2/gpu/list` - 获取GPU列表
 - `GET /api/open/v2/image/market/list` - 获取市场镜像列表
+
+### 工作流管理
+
+调用公开发布的工作流并查询运行结果：
+
+- `GET /api/open/v2/workflow/market/list` - 查询工作流市场列表
+- `GET /api/open/v2/workflow/market/info` - 查询工作流详情和参数清单
+- `POST /api/open/v2/workflow/run/submit` - 提交工作流运行
+- `GET /api/open/v2/workflow/run/list` - 查询工作流运行列表
+- `GET /api/open/v2/workflow/run/info` - 查询工作流运行详情
+- `GET /api/open/v2/workflow/run/execution` - 查询执行进度、日志和输出结果
 
 ## 快速开始
 

@@ -1,0 +1,187 @@
+---
+title: "查询工作流运行详情"
+api: "GET https://www.chenyu.cn/api/open/v2/workflow/run/info"
+description: "查询单次工作流运行订单详情"
+authMethod: "bearer"
+---
+
+# 查询工作流运行详情
+
+根据运行订单 ID 查询运行订单、计费、输入输出和结算信息。
+
+## 请求参数
+
+<ParamField query="run_order_id" type="string" required>
+  运行订单 ID
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码，`0` 表示成功
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  运行订单详情
+
+  <Expandable title="data">
+    <ResponseField name="run_order_id" type="string">
+      运行订单 ID
+    </ResponseField>
+
+    <ResponseField name="workflow_id" type="string">
+      工作流 ID
+    </ResponseField>
+
+    <ResponseField name="revision_id" type="string">
+      运行版本 ID
+    </ResponseField>
+
+    <ResponseField name="quote_amount" type="string">
+      提交时的预估报价
+    </ResponseField>
+
+    <ResponseField name="quote_currency" type="string">
+      报价币种
+    </ResponseField>
+
+    <ResponseField name="freeze_status" type="string">
+      预扣费状态
+    </ResponseField>
+
+    <ResponseField name="submission_status" type="string">
+      提交状态
+    </ResponseField>
+
+    <ResponseField name="run_status" type="string">
+      运行状态
+    </ResponseField>
+
+    <ResponseField name="settlement_status" type="string">
+      结算状态
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      执行引擎任务 ID
+    </ResponseField>
+
+    <ResponseField name="prompt_id" type="string">
+      执行引擎 prompt ID
+    </ResponseField>
+
+    <ResponseField name="inputs" type="object">
+      本次运行输入参数
+    </ResponseField>
+
+    <ResponseField name="outputs" type="object">
+      本次运行输出结果
+    </ResponseField>
+
+    <ResponseField name="compute_cost" type="string">
+      计算资源费用
+    </ResponseField>
+
+    <ResponseField name="external_model_cost" type="string">
+      第三方模型费用
+    </ResponseField>
+
+    <ResponseField name="total_cost" type="string">
+      实际总消耗
+    </ResponseField>
+
+    <ResponseField name="final_amount" type="string">
+      实际结算金额
+    </ResponseField>
+
+    <ResponseField name="released_amount" type="string">
+      已释放预扣金额
+    </ResponseField>
+
+    <ResponseField name="error_code" type="string">
+      失败错误码
+    </ResponseField>
+
+    <ResponseField name="error_message" type="string">
+      失败错误信息
+    </ResponseField>
+
+    <ResponseField name="created_at" type="string">
+      创建时间
+    </ResponseField>
+
+    <ResponseField name="updated_at" type="string">
+      更新时间
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/workflow/run/info"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+params = {
+    "run_order_id": "wfrun_314ff7d8b7a5beff1388"
+}
+
+response = requests.get(url, headers=headers, params=params)
+print(response.json())
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/workflow/run/info?run_order_id=wfrun_314ff7d8b7a5beff1388" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "run_order_id": "wfrun_314ff7d8b7a5beff1388",
+    "workflow_id": "wf_861ef31e94dcfb10e6e7",
+    "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
+    "quote_amount": "0.03000000",
+    "quote_currency": "CNY",
+    "freeze_status": "released",
+    "submission_status": "submitted",
+    "run_status": "succeeded",
+    "settlement_status": "settled",
+    "task_id": "task_1778147626528703038_eb84d292e0851c08",
+    "prompt_id": "prompt_1778147626528707364_b0c0687e49d1f72f",
+    "inputs": {
+      "n6_text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
+      "n7_text": "text, watermark",
+      "n3_seed": 156680208700286
+    },
+    "outputs": {
+      "n9_images": "https://www.chenyu.cn/media/example-output"
+    },
+    "compute_cost": "0.00028780",
+    "external_model_cost": "0.00000000",
+    "total_cost": "0.00028780",
+    "final_amount": "0.00028780",
+    "released_amount": "0.02971220",
+    "error_code": "",
+    "error_message": "",
+    "created_at": "2026-05-08T10:00:00Z",
+    "updated_at": "2026-05-08T10:01:00Z"
+  }
+}
+```

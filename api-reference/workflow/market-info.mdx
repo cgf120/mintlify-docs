@@ -1,0 +1,172 @@
+---
+title: "查询工作流详情"
+api: "GET https://www.chenyu.cn/api/open/v2/workflow/market/info"
+description: "查询公开工作流详情、输入参数清单和输出参数清单"
+authMethod: "bearer"
+---
+
+# 查询工作流详情
+
+根据工作流 ID 查询已发布版本的详情。提交运行前，应先读取 `editable_parameter_manifest`，再按参数清单组装 `inputs`。
+
+<Info>
+  **版本说明**: 返回的 `revision_id` 是当前公开发布版本。提交运行时可以传入该值来锁定本次调用的版本。
+</Info>
+
+## 请求参数
+
+<ParamField query="workflow_id" type="string" required>
+  工作流 ID
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码，`0` 表示成功
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  工作流详情
+
+  <Expandable title="data">
+    <ResponseField name="workflow_id" type="string">
+      工作流 ID
+    </ResponseField>
+
+    <ResponseField name="revision_id" type="string">
+      当前发布版本 ID
+    </ResponseField>
+
+    <ResponseField name="title" type="string">
+      工作流标题
+    </ResponseField>
+
+    <ResponseField name="description" type="string">
+      工作流介绍
+    </ResponseField>
+
+    <ResponseField name="tags" type="array">
+      工作流标签
+    </ResponseField>
+
+    <ResponseField name="covers" type="array">
+      工作流封面地址列表
+    </ResponseField>
+
+    <ResponseField name="owner" type="object">
+      发布者信息，包含 `user_id` 和 `display_name`
+    </ResponseField>
+
+    <ResponseField name="quote_currency" type="string">
+      报价币种，当前为 `CNY`
+    </ResponseField>
+
+    <ResponseField name="quote_amount" type="string">
+      预估报价金额。实际结算以运行完成后的实际消耗为准
+    </ResponseField>
+
+    <ResponseField name="may_incur_external_model_cost" type="boolean">
+      是否可能产生第三方模型费用
+    </ResponseField>
+
+    <ResponseField name="external_cost_notice" type="string">
+      第三方模型费用提示
+    </ResponseField>
+
+    <ResponseField name="editable_parameter_manifest" type="array">
+      可编辑输入参数清单。调用运行接口时，`inputs` 的 key 应使用清单中的 `key`
+    </ResponseField>
+
+    <ResponseField name="candidate_output_manifest" type="array">
+      输出参数清单，用于识别运行结果中的输出类型
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/workflow/market/info"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+params = {
+    "workflow_id": "wf_861ef31e94dcfb10e6e7"
+}
+
+response = requests.get(url, headers=headers, params=params)
+detail = response.json()["data"]
+print(detail["revision_id"])
+print(detail["editable_parameter_manifest"])
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/workflow/market/info?workflow_id=wf_861ef31e94dcfb10e6e7" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "workflow_id": "wf_861ef31e94dcfb10e6e7",
+    "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
+    "title": "文生图111",
+    "description": "文生图基础工作流",
+    "tags": ["文生图", "E2E"],
+    "covers": ["https://www.chenyu.cn/media/example-cover"],
+    "owner": {
+      "user_id": 10001,
+      "display_name": "rohon"
+    },
+    "quote_currency": "CNY",
+    "quote_amount": "0.03000000",
+    "may_incur_external_model_cost": false,
+    "external_cost_notice": "",
+    "editable_parameter_manifest": [
+      {
+        "key": "n6_text",
+        "display_name": "正向提示词",
+        "type": "string",
+        "required": true,
+        "default_value": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,"
+      },
+      {
+        "key": "n7_text",
+        "display_name": "反向提示词",
+        "type": "string",
+        "required": true,
+        "default_value": "text, watermark"
+      },
+      {
+        "key": "n3_seed",
+        "display_name": "seed",
+        "type": "int",
+        "required": true,
+        "default_value": 156680208700286
+      }
+    ],
+    "candidate_output_manifest": [
+      {
+        "key": "n9_images",
+        "type": "image"
+      }
+    ]
+  }
+}
+```

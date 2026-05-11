@@ -1,0 +1,190 @@
+---
+title: "提交工作流运行"
+api: "POST https://www.chenyu.cn/api/open/v2/workflow/run/submit"
+description: "提交一次工作流运行任务"
+authMethod: "bearer"
+---
+
+# 提交工作流运行
+
+提交一次工作流运行任务。系统会先按工作流报价进行预扣费，任务完成后按实际消耗结算，多退少补以实际账单为准。
+
+<Warning>
+  `idempotency_key` 必填。同一用户、相同工作流、相同幂等键的重复请求会返回同一笔运行记录，避免网络重试造成重复提交。
+</Warning>
+
+## 请求参数
+
+<ParamField body="workflow_id" type="string" required>
+  工作流 ID
+</ParamField>
+
+<ParamField body="revision_id" type="string">
+  工作流版本 ID。建议使用详情接口返回的 `revision_id`，不传时使用当前已发布版本
+</ParamField>
+
+<ParamField body="inputs" type="object">
+  工作流输入参数。key 来自详情接口的 `editable_parameter_manifest`
+</ParamField>
+
+<ParamField body="idempotency_key" type="string" required>
+  幂等键，由调用方生成。建议使用业务订单号、请求流水号或 UUID
+</ParamField>
+
+<ParamField body="accept_external_cost_risk" type="boolean">
+  是否确认接受第三方模型费用风险。工作流可能产生外部模型费用时应传 `true`
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码，`0` 表示成功
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  运行提交结果
+
+  <Expandable title="data">
+    <ResponseField name="run_order_id" type="string">
+      运行订单 ID。后续查询运行记录、进度、日志和输出均使用此 ID
+    </ResponseField>
+
+    <ResponseField name="workflow_id" type="string">
+      工作流 ID
+    </ResponseField>
+
+    <ResponseField name="revision_id" type="string">
+      本次运行使用的版本 ID
+    </ResponseField>
+
+    <ResponseField name="quote_currency" type="string">
+      报价币种
+    </ResponseField>
+
+    <ResponseField name="quote_amount" type="string">
+      预扣费参考报价
+    </ResponseField>
+
+    <ResponseField name="freeze_status" type="string">
+      预扣费状态，如 `frozen`
+    </ResponseField>
+
+    <ResponseField name="run_status" type="string">
+      运行状态，如 `queued`、`running`、`succeeded`、`failed`
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      执行引擎任务 ID
+    </ResponseField>
+
+    <ResponseField name="prompt_id" type="string">
+      执行引擎 prompt ID
+    </ResponseField>
+
+    <ResponseField name="billing_run_id" type="string">
+      计费运行 ID
+    </ResponseField>
+
+    <ResponseField name="idempotent_replay" type="boolean">
+      是否为幂等重放结果
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import uuid
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/workflow/run/submit"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+payload = {
+    "workflow_id": "wf_861ef31e94dcfb10e6e7",
+    "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
+    "inputs": {
+        "n6_text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
+        "n7_text": "text, watermark",
+        "n3_seed": 156680208700286
+    },
+    "idempotency_key": str(uuid.uuid4()),
+    "accept_external_cost_risk": False
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json())
+```
+
+```javascript JavaScript
+const axios = require('axios');
+const crypto = require('crypto');
+
+axios.post('https://www.chenyu.cn/api/open/v2/workflow/run/submit', {
+  workflow_id: 'wf_861ef31e94dcfb10e6e7',
+  revision_id: 'wfr_f9f2a2dcb99d73b0c3aa',
+  inputs: {
+    n6_text: 'beautiful scenery nature glass bottle landscape, , purple galaxy bottle,',
+    n7_text: 'text, watermark',
+    n3_seed: 156680208700286
+  },
+  idempotency_key: crypto.randomUUID(),
+  accept_external_cost_risk: false
+}, {
+  headers: {
+    Authorization: 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+  }
+}).then((response) => {
+  console.log(response.data);
+});
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "workflow_id": "wf_861ef31e94dcfb10e6e7",
+    "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
+    "inputs": {
+      "n6_text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
+      "n7_text": "text, watermark",
+      "n3_seed": 156680208700286
+    },
+    "idempotency_key": "run_20260508_001",
+    "accept_external_cost_risk": false
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "提交成功",
+  "data": {
+    "run_order_id": "wfrun_314ff7d8b7a5beff1388",
+    "workflow_id": "wf_861ef31e94dcfb10e6e7",
+    "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
+    "quote_currency": "CNY",
+    "quote_amount": "0.03000000",
+    "freeze_status": "frozen",
+    "run_status": "queued",
+    "task_id": "task_1778147626528703038_eb84d292e0851c08",
+    "prompt_id": "prompt_1778147626528707364_b0c0687e49d1f72f",
+    "billing_run_id": "wfbill_1778147626528703038",
+    "idempotent_replay": false
+  }
+}
+```

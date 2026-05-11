@@ -1,0 +1,194 @@
+---
+title: "查询工作流市场列表"
+api: "GET https://www.chenyu.cn/api/open/v2/workflow/market/list"
+description: "查询公开发布的工作流列表"
+authMethod: "bearer"
+---
+
+# 查询工作流市场列表
+
+获取工作流市场中公开发布的工作流，支持关键字、标签和分页查询。
+
+<Info>
+  **认证方式**: 在请求头中传入 `Authorization: Bearer your_api_key`。
+</Info>
+
+## 请求参数
+
+<ParamField query="keyword" type="string">
+  工作流标题关键字
+</ParamField>
+
+<ParamField query="tag" type="string">
+  标签名称，精确匹配单个标签
+</ParamField>
+
+<ParamField query="sort" type="string">
+  排序方式，默认 `latest`。当前支持 `latest`，`popular` 作为兼容值保留。
+</ParamField>
+
+<ParamField query="page" type="integer">
+  页码，从 `1` 开始，默认 `1`
+</ParamField>
+
+<ParamField query="page_size" type="integer">
+  每页数量，默认 `20`，最大 `100`
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码，`0` 表示成功
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  返回数据
+
+  <Expandable title="data">
+    <ResponseField name="items" type="array">
+      工作流列表
+
+      <Expandable title="items">
+        <ResponseField name="workflow_id" type="string">
+          工作流 ID
+        </ResponseField>
+
+        <ResponseField name="revision_id" type="string">
+          当前发布版本 ID
+        </ResponseField>
+
+        <ResponseField name="title" type="string">
+          工作流标题
+        </ResponseField>
+
+        <ResponseField name="description" type="string">
+          工作流介绍
+        </ResponseField>
+
+        <ResponseField name="cover_url" type="string">
+          工作流封面地址
+        </ResponseField>
+
+        <ResponseField name="tags" type="array">
+          工作流标签
+        </ResponseField>
+
+        <ResponseField name="owner" type="object">
+          发布者信息，包含 `user_id` 和 `display_name`
+        </ResponseField>
+
+        <ResponseField name="quote_currency" type="string">
+          报价币种，当前为 `CNY`
+        </ResponseField>
+
+        <ResponseField name="quote_amount" type="string">
+          预估报价金额。实际结算以运行完成后的实际消耗为准
+        </ResponseField>
+
+        <ResponseField name="may_incur_external_model_cost" type="boolean">
+          是否可能产生第三方模型费用
+        </ResponseField>
+
+        <ResponseField name="updated_at" type="string">
+          更新时间
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+
+    <ResponseField name="total" type="integer">
+      总记录数
+    </ResponseField>
+
+    <ResponseField name="page" type="integer">
+      当前页码
+    </ResponseField>
+
+    <ResponseField name="page_size" type="integer">
+      每页数量
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/workflow/market/list"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+params = {
+    "keyword": "文生图",
+    "page": 1,
+    "page_size": 20
+}
+
+response = requests.get(url, headers=headers, params=params)
+print(response.json())
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+axios.get('https://www.chenyu.cn/api/open/v2/workflow/market/list', {
+  headers: {
+    Authorization: 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+  },
+  params: {
+    keyword: '文生图',
+    page: 1,
+    page_size: 20
+  }
+}).then((response) => {
+  console.log(response.data);
+});
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/workflow/market/list?keyword=%E6%96%87%E7%94%9F%E5%9B%BE&page=1&page_size=20" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "items": [
+      {
+        "workflow_id": "wf_861ef31e94dcfb10e6e7",
+        "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
+        "title": "文生图111",
+        "description": "文生图基础工作流",
+        "cover_url": "https://www.chenyu.cn/media/example-cover",
+        "tags": ["文生图", "E2E"],
+        "owner": {
+          "user_id": 10001,
+          "display_name": "rohon"
+        },
+        "quote_currency": "CNY",
+        "quote_amount": "0.03000000",
+        "may_incur_external_model_cost": false,
+        "updated_at": "2026-05-08T10:00:00Z"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "page_size": 20
+  }
+}
+```

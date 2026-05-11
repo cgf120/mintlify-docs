@@ -88,6 +88,17 @@
             ]
           },
           {
+            "group": "工作流管理（草稿）",
+            "pages": [
+              "api-reference/workflow/market-list",
+              "api-reference/workflow/market-info",
+              "api-reference/workflow/run-submit",
+              "api-reference/workflow/run-list",
+              "api-reference/workflow/run-info",
+              "api-reference/workflow/run-execution"
+            ]
+          },
+          {
             "group": "余额管理",
             "pages": [
               "api-reference/balance/info"
