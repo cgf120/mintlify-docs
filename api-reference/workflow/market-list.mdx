@@ -1,16 +1,20 @@
 ---
 title: "查询工作流市场列表"
 api: "GET https://www.chenyu.cn/api/open/v2/workflow/market/list"
-description: "查询公开发布的工作流列表"
+description: "查询公开发布以及当前 API Key 所属用户自己的已发布工作流列表"
 authMethod: "bearer"
 ---
 
 # 查询工作流市场列表
 
-获取工作流市场中公开发布的工作流，支持关键字、标签和分页查询。
+获取工作流市场中公开发布的工作流，以及当前 API Key 所属用户自己的已发布工作流，支持关键字、标签和分页查询。
 
 <Info>
   **认证方式**: 在请求头中传入 `Authorization: Bearer your_api_key`。
+</Info>
+
+<Info>
+  **可见范围**: 返回 `visibility = public` 的已发布工作流，以及当前 API Key 所属用户自己已发布的工作流。自己的非公开工作流也可以通过该接口查询到，便于后续读取详情并提交运行。
 </Info>
 
 ## 请求参数

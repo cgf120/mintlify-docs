@@ -95,6 +95,40 @@ authMethod: "bearer"
   </Expandable>
 </ResponseField>
 
+## 错误响应
+
+当查询执行进度时执行引擎暂不可用或返回错误，接口会返回一个简单原因和详细错误信息。
+
+<ResponseField name="code" type="integer">
+  非 `0` 表示失败
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  简单失败原因
+</ResponseField>
+
+<ResponseField name="data.error" type="object">
+  执行引擎错误详情
+
+  <Expandable title="data.error">
+    <ResponseField name="reason" type="string">
+      简单失败原因，与 `msg` 保持一致
+    </ResponseField>
+
+    <ResponseField name="detail" type="string">
+      详细错误信息
+    </ResponseField>
+
+    <ResponseField name="engine_code" type="string">
+      执行引擎返回的错误码
+    </ResponseField>
+
+    <ResponseField name="status_code" type="integer">
+      执行引擎 HTTP 状态码
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
 ## 代码示例
 
 <CodeGroup>
@@ -199,6 +233,23 @@ curl -X GET "https://www.chenyu.cn/api/open/v2/workflow/run/execution?run_order_
     "created_at": "2026-05-08T10:00:00Z",
     "started_at": "2026-05-08T10:00:01Z",
     "terminal_at": "2026-05-08T10:00:10Z"
+  }
+}
+```
+
+## 错误示例
+
+```json
+{
+  "code": 1,
+  "msg": "Task not found.",
+  "data": {
+    "error": {
+      "reason": "Task not found.",
+      "detail": "execution task task_1778147626528703038_eb84d292e0851c08 does not exist",
+      "engine_code": "TASK_NOT_FOUND",
+      "status_code": 404
+    }
   }
 }
 ```

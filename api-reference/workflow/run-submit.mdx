@@ -95,6 +95,40 @@ authMethod: "bearer"
   </Expandable>
 </ResponseField>
 
+## 错误响应
+
+当提交阶段调用执行引擎失败时，接口会返回一个简单原因和详细错误信息，便于定位输入参数、文件获取、实例调度或工作流执行器问题。
+
+<ResponseField name="code" type="integer">
+  非 `0` 表示失败
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  简单失败原因
+</ResponseField>
+
+<ResponseField name="data.error" type="object">
+  执行引擎错误详情
+
+  <Expandable title="data.error">
+    <ResponseField name="reason" type="string">
+      简单失败原因，与 `msg` 保持一致
+    </ResponseField>
+
+    <ResponseField name="detail" type="string">
+      详细错误信息
+    </ResponseField>
+
+    <ResponseField name="engine_code" type="string">
+      执行引擎返回的错误码
+    </ResponseField>
+
+    <ResponseField name="status_code" type="integer">
+      执行引擎 HTTP 状态码
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
 ## 代码示例
 
 <CodeGroup>
@@ -185,6 +219,23 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
     "prompt_id": "prompt_1778147626528707364_b0c0687e49d1f72f",
     "billing_run_id": "wfbill_1778147626528703038",
     "idempotent_replay": false
+  }
+}
+```
+
+## 错误示例
+
+```json
+{
+  "code": 1,
+  "msg": "Workflow input content is invalid.",
+  "data": {
+    "error": {
+      "reason": "Workflow input content is invalid.",
+      "detail": "input n4_video must be an uploaded file URL or file id",
+      "engine_code": "INVALID_WORKFLOW_INPUT",
+      "status_code": 400
+    }
   }
 }
 ```

@@ -1,16 +1,20 @@
 ---
 title: "查询工作流详情"
 api: "GET https://www.chenyu.cn/api/open/v2/workflow/market/info"
-description: "查询公开工作流详情、输入参数清单和输出参数清单"
+description: "查询可访问的已发布工作流详情、输入参数清单和输出参数清单"
 authMethod: "bearer"
 ---
 
 # 查询工作流详情
 
-根据工作流 ID 查询已发布版本的详情。提交运行前，应先读取 `editable_parameter_manifest`，再按参数清单组装 `inputs`。
+根据工作流 ID 查询当前 API Key 可访问的已发布版本详情。提交运行前，应先读取 `editable_parameter_manifest`，再按参数清单组装 `inputs`。
 
 <Info>
-  **版本说明**: 返回的 `revision_id` 是当前公开发布版本。提交运行时可以传入该值来锁定本次调用的版本。
+  **版本说明**: 返回的 `revision_id` 是当前可访问的已发布版本。提交运行时可以传入该值来锁定本次调用的版本。
+</Info>
+
+<Info>
+  **可见范围**: 支持查询公开发布的工作流，也支持查询当前 API Key 所属用户自己已发布的非公开工作流。
 </Info>
 
 ## 请求参数
