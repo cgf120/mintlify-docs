@@ -2131,7 +2131,7 @@
                   "inputs": {
                     "type": "object",
                     "additionalProperties": true,
-                    "description": "工作流输入参数"
+                    "description": "工作流输入参数。Seedance 真人素材备案可在 inputs 中传 contains_real_person_material=true，表示图片和视频素材需先进行火山素材备案；音频不参与备案。"
                   },
                   "idempotency_key": {
                     "type": "string",

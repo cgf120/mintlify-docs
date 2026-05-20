@@ -27,6 +27,11 @@ authMethod: "bearer"
   工作流输入参数。key 来自详情接口的 `editable_parameter_manifest`
 </ParamField>
 
+<ParamField body="inputs.contains_real_person_material" type="boolean">
+  Seedance 视频生成工作流专用。上传的图片或视频素材包含真人并需要进行火山素材备案时传 `true`；
+  未传或为 `false` 时，图片、视频、音频按普通工作流 S3 公网 URL 方式提交。音频不会进入真人素材备案。
+</ParamField>
+
 <ParamField body="idempotency_key" type="string" required>
   幂等键，由调用方生成。建议使用业务订单号、请求流水号或 UUID
 </ParamField>
@@ -146,9 +151,19 @@ payload = {
     "workflow_id": "wf_861ef31e94dcfb10e6e7",
     "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
     "inputs": {
-        "n6_text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
-        "n7_text": "text, watermark",
-        "n3_seed": 156680208700286
+        "generation_category": "reference_to_video",
+        "model": "doubao-seedance-2-0-fast-260128",
+        "prompt": "cinematic portrait video",
+        "images": [
+            {
+                "source_type": "url",
+                "url": "https://www.chenyu.cn/media/example-image",
+                "role": "reference_image"
+            }
+        ],
+        "contains_real_person_material": true,
+        "resolution": "720p",
+        "duration": "5"
     },
     "idempotency_key": str(uuid.uuid4()),
     "accept_external_cost_risk": False
@@ -166,9 +181,17 @@ axios.post('https://www.chenyu.cn/api/open/v2/workflow/run/submit', {
   workflow_id: 'wf_861ef31e94dcfb10e6e7',
   revision_id: 'wfr_f9f2a2dcb99d73b0c3aa',
   inputs: {
-    n6_text: 'beautiful scenery nature glass bottle landscape, , purple galaxy bottle,',
-    n7_text: 'text, watermark',
-    n3_seed: 156680208700286
+    generation_category: 'reference_to_video',
+    model: 'doubao-seedance-2-0-fast-260128',
+    prompt: 'cinematic portrait video',
+    images: [{
+      source_type: 'url',
+      url: 'https://www.chenyu.cn/media/example-image',
+      role: 'reference_image'
+    }],
+    contains_real_person_material: true,
+    resolution: '720p',
+    duration: '5'
   },
   idempotency_key: crypto.randomUUID(),
   accept_external_cost_risk: false
@@ -190,9 +213,19 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
     "workflow_id": "wf_861ef31e94dcfb10e6e7",
     "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
     "inputs": {
-      "n6_text": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,",
-      "n7_text": "text, watermark",
-      "n3_seed": 156680208700286
+      "generation_category": "reference_to_video",
+      "model": "doubao-seedance-2-0-fast-260128",
+      "prompt": "cinematic portrait video",
+      "images": [
+        {
+          "source_type": "url",
+          "url": "https://www.chenyu.cn/media/example-image",
+          "role": "reference_image"
+        }
+      ],
+      "contains_real_person_material": true,
+      "resolution": "720p",
+      "duration": "5"
     },
     "idempotency_key": "run_20260508_001",
     "accept_external_cost_risk": false
