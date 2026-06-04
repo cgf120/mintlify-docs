@@ -1,0 +1,115 @@
+---
+title: "创建视频任务"
+api: "POST https://api.chenyu.cn/v1/videos"
+description: "创建视频生成任务"
+authMethod: "bearer"
+---
+
+# 创建视频任务
+
+创建视频生成任务。视频生成是异步任务，接口会先返回任务 ID，后续通过查询接口获取状态和结果。
+
+## 请求参数
+
+<ParamField body="model" type="string" required>
+  视频生成模型 ID
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  视频生成提示词
+</ParamField>
+
+<ParamField body="image" type="string">
+  可选参考图片 URL。具体支持范围以模型为准
+</ParamField>
+
+<ParamField body="duration" type="string">
+  视频时长，例如 `5`
+</ParamField>
+
+<ParamField body="resolution" type="string">
+  输出分辨率，例如 `720p`、`1080p`
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="id" type="string">
+  视频任务 ID。后续查询任务状态时使用
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  固定为 `video`
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  实际调用的模型 ID
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  任务状态，如 `queued`、`running`、`succeeded`、`failed`
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+  创建时间戳
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://api.chenyu.cn/v1/videos"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+payload = {
+    "model": "doubao-seedance-2-0-fast-260128",
+    "prompt": "一只白色机器人在未来城市街道上行走，电影感镜头"
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json()["id"])
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+axios.post('https://api.chenyu.cn/v1/videos', {
+  model: 'doubao-seedance-2-0-fast-260128',
+  prompt: '一只白色机器人在未来城市街道上行走，电影感镜头'
+}, {
+  headers: {
+    Authorization: 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+  }
+}).then((response) => {
+  console.log(response.data.id);
+});
+```
+
+```curl cURL
+curl -X POST "https://api.chenyu.cn/v1/videos" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "doubao-seedance-2-0-fast-260128",
+    "prompt": "一只白色机器人在未来城市街道上行走，电影感镜头"
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "id": "cgt-20260602154730-twmv2",
+  "object": "video",
+  "model": "doubao-seedance-2-0-fast-260128",
+  "status": "queued",
+  "created_at": 1780000000
+}
+```

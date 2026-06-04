@@ -1,0 +1,179 @@
+---
+title: "文本与多模态对话"
+api: "POST https://api.chenyu.cn/v1/chat/completions"
+description: "使用 OpenAI Chat Completions 格式调用文本和视觉模型"
+authMethod: "bearer"
+---
+
+# 文本与多模态对话
+
+使用 OpenAI Chat Completions 兼容格式调用文本模型或视觉模型。支持普通文本、图片输入、多图输入和流式响应。
+
+## 请求参数
+
+<ParamField body="model" type="string" required>
+  模型 ID。可通过 [模型列表](/llm-gateway/api/models) 查询
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  对话消息列表
+</ParamField>
+
+<ParamField body="messages[].role" type="string" required>
+  消息角色，支持 `system`、`user`、`assistant`
+</ParamField>
+
+<ParamField body="messages[].content" type="string | array" required>
+  消息内容。文本模型可传字符串；视觉模型可传 OpenAI 多模态 content 数组
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+  是否使用 Server-Sent Events 流式响应
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  采样温度
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+  最大输出 token 数
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="id" type="string">
+  响应 ID
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  响应类型，通常为 `chat.completion`
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  实际调用的模型 ID
+</ResponseField>
+
+<ResponseField name="choices" type="array">
+  输出候选列表
+
+  <Expandable title="choices">
+    <ResponseField name="message.role" type="string">
+      输出消息角色
+    </ResponseField>
+
+    <ResponseField name="message.content" type="string">
+      输出文本
+    </ResponseField>
+
+    <ResponseField name="finish_reason" type="string">
+      停止原因
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  token 用量
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://api.chenyu.cn/v1/chat/completions"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+payload = {
+    "model": "doubao-seed-2-0-lite-260428",
+    "messages": [
+        {"role": "user", "content": "你好，简单介绍一下你自己"}
+    ]
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json()["choices"][0]["message"]["content"])
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+axios.post('https://api.chenyu.cn/v1/chat/completions', {
+  model: 'doubao-seed-2-0-lite-260428',
+  messages: [
+    { role: 'user', content: '你好，简单介绍一下你自己' }
+  ]
+}, {
+  headers: {
+    Authorization: 'Bearer your_api_key',
+    'Content-Type': 'application/json'
+  }
+}).then((response) => {
+  console.log(response.data.choices[0].message.content);
+});
+```
+
+```curl cURL
+curl -X POST "https://api.chenyu.cn/v1/chat/completions" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "doubao-seed-2-0-lite-260428",
+    "messages": [
+      {"role": "user", "content": "你好，简单介绍一下你自己"}
+    ]
+  }'
+```
+
+</CodeGroup>
+
+## 多模态示例
+
+```json
+{
+  "model": "doubao-seed-1-6-vision-250815",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "这张图片里有什么？"},
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "https://example.com/image.png"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+## 响应示例
+
+```json
+{
+  "id": "chatcmpl_xxx",
+  "object": "chat.completion",
+  "created": 1780000000,
+  "model": "doubao-seed-2-0-lite-260428",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "你好，我是晨羽智云大模型服务。"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 20,
+    "completion_tokens": 12,
+    "total_tokens": 32
+  }
+}
+```

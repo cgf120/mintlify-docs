@@ -1,0 +1,62 @@
+---
+title: "直接 API 调用"
+description: "通过 OpenAI 兼容的 HTTP API 调用大模型网关"
+icon: "terminal"
+---
+
+# 直接 API 调用
+
+直接 HTTP 调用统一使用 OpenAI 兼容路径：
+
+```text
+https://api.chenyu.cn/v1
+```
+
+## 认证
+
+在请求头中传入 API Key：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+## 接口列表
+
+<CardGroup cols={2}>
+  <Card title="模型列表" icon="list" href="/llm-gateway/api/models">
+    查询当前 API Key 可用的大模型列表
+  </Card>
+  <Card title="文本与多模态对话" icon="message" href="/llm-gateway/api/chat-completions">
+    使用 OpenAI Chat Completions 格式调用文本和视觉模型
+  </Card>
+  <Card title="Responses API" icon="code" href="/llm-gateway/api/responses">
+    使用 OpenAI Responses 格式调用文本模型
+  </Card>
+  <Card title="文生图" icon="image" href="/llm-gateway/api/image-generations">
+    使用文本提示词生成图片
+  </Card>
+  <Card title="图片编辑" icon="pen-to-square" href="/llm-gateway/api/image-edits">
+    上传图片并按提示词编辑
+  </Card>
+  <Card title="Embeddings" icon="database" href="/llm-gateway/api/embeddings">
+    将文本转换为向量
+  </Card>
+  <Card title="视频任务" icon="video" href="/llm-gateway/api/video-create">
+    创建视频生成任务并查询结果
+  </Card>
+</CardGroup>
+
+## 流式响应
+
+对话接口支持 OpenAI 风格流式响应，详见 [文本与多模态对话](/llm-gateway/api/chat-completions)。
+
+```json
+{
+  "model": "doubao-seed-2-0-lite-260428",
+  "messages": [{"role": "user", "content": "写一个简短故事"}],
+  "stream": true
+}
+```
+
+客户端需要按 Server-Sent Events 处理返回数据。

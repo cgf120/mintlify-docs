@@ -1,0 +1,115 @@
+---
+title: "图片编辑"
+api: "POST https://api.chenyu.cn/v1/images/edits"
+description: "上传图片并按提示词编辑"
+authMethod: "bearer"
+---
+
+# 图片编辑
+
+使用 OpenAI Images Edit 兼容格式编辑图片。请求使用 `multipart/form-data`。
+
+## 请求参数
+
+<ParamField body="model" type="string" required>
+  图片编辑模型 ID
+</ParamField>
+
+<ParamField body="image" type="file" required>
+  待编辑图片文件
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  编辑提示词
+</ParamField>
+
+<ParamField body="size" type="string">
+  输出图片尺寸，例如 `1024x1024`
+</ParamField>
+
+<ParamField body="n" type="integer">
+  生成图片数量
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="created" type="integer">
+  创建时间戳
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  编辑结果列表
+
+  <Expandable title="data">
+    <ResponseField name="url" type="string">
+      图片访问地址
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://api.chenyu.cn/v1/images/edits"
+headers = {"Authorization": "Bearer your_api_key"}
+data = {
+    "model": "doubao-seedream-5-0-lite-260128",
+    "prompt": "把背景改成浅蓝色，保持主体不变",
+    "size": "1024x1024"
+}
+files = {
+    "image": open("input.png", "rb")
+}
+
+response = requests.post(url, headers=headers, data=data, files=files)
+print(response.json()["data"][0]["url"])
+```
+
+```javascript JavaScript
+const axios = require('axios');
+const fs = require('fs');
+const FormData = require('form-data');
+
+const form = new FormData();
+form.append('model', 'doubao-seedream-5-0-lite-260128');
+form.append('prompt', '把背景改成浅蓝色，保持主体不变');
+form.append('size', '1024x1024');
+form.append('image', fs.createReadStream('input.png'));
+
+axios.post('https://api.chenyu.cn/v1/images/edits', form, {
+  headers: {
+    Authorization: 'Bearer your_api_key',
+    ...form.getHeaders()
+  }
+}).then((response) => {
+  console.log(response.data.data[0].url);
+});
+```
+
+```curl cURL
+curl -X POST "https://api.chenyu.cn/v1/images/edits" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "model=doubao-seedream-5-0-lite-260128" \
+  -F "prompt=把背景改成浅蓝色，保持主体不变" \
+  -F "size=1024x1024" \
+  -F "image=@input.png"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "created": 1780000000,
+  "data": [
+    {
+      "url": "https://example.com/edited.png"
+    }
+  ]
+}
+```

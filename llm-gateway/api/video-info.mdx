@@ -1,0 +1,90 @@
+---
+title: "查询视频任务"
+api: "GET https://api.chenyu.cn/v1/videos/{task_id}"
+description: "查询视频生成任务状态和结果"
+authMethod: "bearer"
+---
+
+# 查询视频任务
+
+根据任务 ID 查询视频生成任务状态和结果。
+
+## 请求参数
+
+<ParamField path="task_id" type="string" required>
+  视频任务 ID，由 [创建视频任务](/llm-gateway/api/video-create) 返回
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="id" type="string">
+  视频任务 ID
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  固定为 `video`
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  模型 ID
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  任务状态，如 `queued`、`running`、`succeeded`、`failed`
+</ResponseField>
+
+<ResponseField name="url" type="string">
+  视频地址。仅任务完成后返回
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  失败信息。仅任务失败时返回
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+task_id = "cgt-20260602154730-twmv2"
+url = f"https://api.chenyu.cn/v1/videos/{task_id}"
+headers = {"Authorization": "Bearer your_api_key"}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const taskId = 'cgt-20260602154730-twmv2';
+
+axios.get(`https://api.chenyu.cn/v1/videos/${taskId}`, {
+  headers: {
+    Authorization: 'Bearer your_api_key'
+  }
+}).then((response) => {
+  console.log(response.data);
+});
+```
+
+```curl cURL
+curl -X GET "https://api.chenyu.cn/v1/videos/cgt-20260602154730-twmv2" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "id": "cgt-20260602154730-twmv2",
+  "object": "video",
+  "model": "doubao-seedance-2-0-fast-260128",
+  "status": "succeeded",
+  "url": "https://example.com/video.mp4"
+}
+```

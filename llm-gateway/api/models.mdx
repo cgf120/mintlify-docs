@@ -1,0 +1,97 @@
+---
+title: "模型列表"
+api: "GET https://api.chenyu.cn/v1/models"
+description: "查询当前 API Key 可用的大模型列表"
+authMethod: "bearer"
+---
+
+# 模型列表
+
+查询当前 API Key 可用的大模型列表。返回的 `id` 即调用其它接口时使用的 `model`。
+
+## 请求参数
+
+无需请求参数。
+
+## 响应参数
+
+<ResponseField name="object" type="string">
+  固定为 `list`
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  模型列表
+
+  <Expandable title="data">
+    <ResponseField name="id" type="string">
+      模型 ID
+    </ResponseField>
+
+    <ResponseField name="object" type="string">
+      固定为 `model`
+    </ResponseField>
+
+    <ResponseField name="owned_by" type="string">
+      模型提供方
+    </ResponseField>
+
+    <ResponseField name="capabilities" type="object">
+      模型能力信息，包括可用接口和输入输出模态
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://api.chenyu.cn/v1/models"
+headers = {"Authorization": "Bearer your_api_key"}
+
+response = requests.get(url, headers=headers)
+print(response.json())
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+axios.get('https://api.chenyu.cn/v1/models', {
+  headers: {
+    Authorization: 'Bearer your_api_key'
+  }
+}).then((response) => {
+  console.log(response.data);
+});
+```
+
+```curl cURL
+curl -X GET "https://api.chenyu.cn/v1/models" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "doubao-seed-2-0-lite-260428",
+      "object": "model",
+      "owned_by": "volcengine",
+      "capabilities": {
+        "endpoints": ["chat.completions", "responses"],
+        "modalities": {
+          "input": ["text"],
+          "output": ["text"]
+        }
+      }
+    }
+  ]
+}
+```

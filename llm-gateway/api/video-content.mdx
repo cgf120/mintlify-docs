@@ -1,0 +1,73 @@
+---
+title: "获取视频内容"
+api: "GET https://api.chenyu.cn/v1/videos/{task_id}/content"
+description: "获取已完成视频任务的内容地址"
+authMethod: "bearer"
+---
+
+# 获取视频内容
+
+当视频任务已完成时，可通过该接口获取视频内容。接口会在视频可用时跳转到实际视频文件地址。
+
+## 请求参数
+
+<ParamField path="task_id" type="string" required>
+  视频任务 ID，由 [创建视频任务](/llm-gateway/api/video-create) 返回
+</ParamField>
+
+## 响应说明
+
+任务完成且视频地址可用时，接口返回 HTTP 跳转响应，客户端可跟随跳转下载或播放视频。
+
+如果任务未完成或失败，会返回错误信息。
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+task_id = "cgt-20260602154730-twmv2"
+url = f"https://api.chenyu.cn/v1/videos/{task_id}/content"
+headers = {"Authorization": "Bearer your_api_key"}
+
+response = requests.get(url, headers=headers, allow_redirects=True)
+open("output.mp4", "wb").write(response.content)
+```
+
+```javascript JavaScript
+const axios = require('axios');
+const fs = require('fs');
+
+const taskId = 'cgt-20260602154730-twmv2';
+
+axios.get(`https://api.chenyu.cn/v1/videos/${taskId}/content`, {
+  headers: {
+    Authorization: 'Bearer your_api_key'
+  },
+  responseType: 'stream'
+}).then((response) => {
+  response.data.pipe(fs.createWriteStream('output.mp4'));
+});
+```
+
+```curl cURL
+curl -L "https://api.chenyu.cn/v1/videos/cgt-20260602154730-twmv2/content" \
+  -H "Authorization: Bearer your_api_key" \
+  -o output.mp4
+```
+
+</CodeGroup>
+
+## 错误示例
+
+```json
+{
+  "error": {
+    "type": "invalid_request_error",
+    "code": "video_not_ready",
+    "message": "The video task is not completed yet."
+  }
+}
+```

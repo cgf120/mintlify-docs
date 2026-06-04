@@ -1,0 +1,79 @@
+---
+title: "大模型网关概览"
+description: "通过 OpenAI、Anthropic 和 Codex 兼容接口调用晨羽智云大模型服务"
+icon: "brain"
+---
+
+# 大模型网关概览
+
+晨羽智云大模型网关提供统一的模型调用入口。您可以直接通过 HTTP API 调用，也可以使用 OpenAI SDK、Claude Code 或 Codex 接入。
+
+## 基础地址
+
+```text
+https://api.chenyu.cn
+```
+
+所有请求都需要使用 API Key 认证：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 选择接入方式
+
+<CardGroup cols={2}>
+  <Card title="直接 API 调用" icon="terminal" href="/llm-gateway/direct-api">
+    使用 curl、requests、axios 或任意 HTTP 客户端直接调用 `/v1/*` 接口
+  </Card>
+  <Card title="OpenAI SDK" icon="code" href="/llm-gateway/openai-sdk">
+    使用 OpenAI 官方 SDK，把 `base_url` 指向晨羽智云网关
+  </Card>
+  <Card title="Claude Code" icon="sparkles" href="/llm-gateway/claude-code">
+    使用 Anthropic Messages 兼容接口接入 Claude Code
+  </Card>
+  <Card title="Codex" icon="terminal" href="/llm-gateway/codex">
+    使用 Codex 自定义 provider 接入晨羽智云模型
+  </Card>
+</CardGroup>
+
+## 协议入口
+
+| 场景 | Base URL | 说明 |
+| --- | --- | --- |
+| OpenAI 兼容 API | `https://api.chenyu.cn/v1` | 面向 OpenAI SDK 和直接 HTTP 调用 |
+| Claude Code | `https://api.chenyu.cn/anthropic` | Claude Code 会自动追加 `/v1/messages` |
+| Codex | `https://api.chenyu.cn/codex/v1` | Codex 自定义 provider，使用 Responses 协议 |
+
+## 模型命名
+
+OpenAI 兼容接口和 Codex 使用真实模型 ID：
+
+```text
+doubao-seed-2-0-lite-260428
+```
+
+Claude Code 使用 `claude-` 前缀别名：
+
+```text
+claude-doubao-seed-2-0-lite-260428
+```
+
+网关会在转发前自动移除 `claude-` 前缀，计费和上游调用仍按真实模型处理。
+
+## 能力范围
+
+当前网关支持：
+
+- 文本对话
+- 多模态图片输入
+- 多图生文
+- 文生图
+- 图片编辑
+- Embeddings
+- 视频任务创建和查询
+- OpenAI SDK 兼容调用
+- Claude Code 模型发现和对话
+- Codex 模型发现和多轮对话
+
+具体可用模型以 `/v1/models` 返回结果为准。

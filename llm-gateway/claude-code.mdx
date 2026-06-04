@@ -1,0 +1,74 @@
+---
+title: "Claude Code 接入"
+description: "通过 Anthropic Messages 兼容接口接入 Claude Code"
+icon: "sparkles"
+---
+
+# Claude Code 接入
+
+Claude Code 使用 Anthropic Messages 协议。晨羽智云网关提供 `/anthropic/v1/*` 兼容路径。
+
+## 环境变量
+
+```bash
+export ANTHROPIC_BASE_URL="https://api.chenyu.cn/anthropic"
+export ANTHROPIC_AUTH_TOKEN="YOUR_API_KEY"
+export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1
+claude
+```
+
+<Warning>
+  `ANTHROPIC_BASE_URL` 不要包含 `/v1`。Claude Code 会自动在后面追加 `/v1/messages`。
+</Warning>
+
+## 模型选择
+
+进入 Claude Code 后，可以使用 `/model` 查看和切换模型。Claude Code 路径返回的是 `claude-` 前缀别名，例如：
+
+```text
+claude-doubao-seed-2-0-lite-260428
+```
+
+网关会在转发前自动移除 `claude-` 前缀，因此计费、模型权限和上游调用仍按真实模型 ID 处理。
+
+## 支持能力
+
+Claude Code 兼容路径支持：
+
+- 文本对话
+- 图片输入
+- 多轮上下文
+- 流式响应
+- 工具定义和工具结果
+- 模型发现
+- token 估算接口
+
+## 常见问题
+
+### 模型列表没有出现
+
+确认已设置：
+
+```bash
+export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1
+```
+
+并确认 `ANTHROPIC_BASE_URL` 是：
+
+```text
+https://api.chenyu.cn/anthropic
+```
+
+而不是：
+
+```text
+https://api.chenyu.cn/anthropic/v1
+```
+
+### 提示需要登录
+
+Claude Code 本地可能存在缓存状态。确认环境变量后重新打开终端，或清理 Claude Code 本地缓存后再启动。
+
+### API Key 无效
+
+确认 API Key 可以访问晨羽智云开放接口，并且账户余额充足。

@@ -1,0 +1,79 @@
+---
+title: "Codex 接入"
+description: "通过 Codex 自定义 provider 使用晨羽智云大模型网关"
+icon: "terminal"
+---
+
+# Codex 接入
+
+Codex 使用自定义 provider 接入。晨羽智云网关为 Codex 单独提供 `/codex/v1/*` 路径，用于返回 Codex 模型目录并转发 Responses 请求。
+
+## 配置文件
+
+在使用 Codex 的机器上编辑：
+
+```text
+~/.codex/config.toml
+```
+
+写入：
+
+```toml
+model = "doubao-seed-2-0-lite-260428"
+model_provider = "chenyu-codex"
+
+[model_providers.chenyu-codex]
+name = "Chenyu Codex"
+base_url = "https://api.chenyu.cn/codex/v1"
+wire_api = "responses"
+supports_websockets = false
+
+[model_providers.chenyu-codex.auth]
+command = "/bin/sh"
+args = ["-lc", "printf %s \"$CHENYU_LLM_API_KEY\""]
+refresh_interval_ms = 0
+```
+
+## 启动
+
+启动前设置 API Key：
+
+```bash
+export CHENYU_LLM_API_KEY="YOUR_API_KEY"
+codex
+```
+
+## 模型选择
+
+Codex 中使用 `/model` 查看和切换模型。Codex 路径使用真实模型 ID，不使用 `claude-` 前缀：
+
+```text
+doubao-seed-2-0-lite-260428
+```
+
+`/codex/v1/models` 只返回适合 Codex 使用的文本类模型，会过滤图片、视频、embedding 和 3D 模型。
+
+## 为什么使用独立 Codex 路径
+
+Codex 的模型目录不是标准 OpenAI `/v1/models` 格式。它需要专用 catalog 字段来驱动 `/model` 模型选择器。
+
+因此推荐：
+
+| 客户端 | 路径 |
+| --- | --- |
+| OpenAI SDK | `/v1` |
+| Claude Code | `/anthropic` |
+| Codex | `/codex/v1` |
+
+这样可以同时保持 OpenAI SDK 的真实模型列表，以及 Codex 的模型选择体验。
+
+## 兼容说明
+
+Codex 会发送一些 OpenAI Responses 专属字段。网关会自动处理常见兼容问题，包括：
+
+- 清理上游不支持的 Codex 元数据字段
+- 为多轮对话历史补充必要状态
+- 过滤上游不支持的工具类型
+- 隐藏 Codex 内置的官方默认模型
+
+如果第二轮对话出现上游参数错误，请确认正在使用 `/codex/v1` 路径，并确认文档中的 `auth.command` 配置已完整保留。

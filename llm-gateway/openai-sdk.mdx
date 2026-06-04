@@ -1,0 +1,171 @@
+---
+title: "OpenAI SDK 接入"
+description: "使用 OpenAI 官方 SDK 调用晨羽智云大模型网关"
+icon: "code"
+---
+
+# OpenAI SDK 接入
+
+OpenAI SDK 用户只需要把 `base_url` 指向晨羽智云网关，并使用晨羽智云 API Key。
+
+## 安装
+
+```bash
+pip install openai
+```
+
+## 初始化客户端
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.chenyu.cn/v1",
+    api_key="YOUR_API_KEY",
+)
+```
+
+## 获取模型列表
+
+```python
+models = client.models.list()
+for model in models.data:
+    print(model.id)
+```
+
+## 文本对话
+
+```python
+resp = client.chat.completions.create(
+    model="doubao-seed-2-0-lite-260428",
+    messages=[
+        {"role": "user", "content": "你好，简单介绍一下你自己"}
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+## 图生文
+
+```python
+resp = client.chat.completions.create(
+    model="doubao-seed-1-6-vision-250815",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "这张图里有什么？"},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": "https://example.com/image.png"
+                    },
+                },
+            ],
+        }
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+## 多图生文
+
+```python
+resp = client.chat.completions.create(
+    model="doubao-seed-1-6-vision-250815",
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "比较两张图片的差异"},
+                {"type": "image_url", "image_url": {"url": "https://example.com/a.png"}},
+                {"type": "image_url", "image_url": {"url": "https://example.com/b.png"}},
+            ],
+        }
+    ],
+)
+
+print(resp.choices[0].message.content)
+```
+
+## Responses API
+
+```python
+resp = client.responses.create(
+    model="doubao-seed-2-0-lite-260428",
+    input="用三句话说明 GPU 云服务适合哪些场景",
+)
+
+print(resp.output_text)
+```
+
+模型专属参数可以通过 `extra_body` 传递：
+
+```python
+resp = client.responses.create(
+    model="doubao-seed-2-0-lite-260428",
+    input="分析这个问题",
+    extra_body={
+        "thinking": {"type": "enabled"},
+        "reasoning": {"effort": "low"},
+    },
+)
+```
+
+## 文生图
+
+```python
+img = client.images.generate(
+    model="doubao-seedream-5-0-lite-260128",
+    prompt="电商主图，白底，一瓶护肤品，柔和布光",
+    size="1024x1024",
+)
+
+print(img.data[0].url)
+```
+
+## 图片编辑
+
+```python
+with open("input.png", "rb") as image:
+    edited = client.images.edit(
+        model="doubao-seedream-5-0-lite-260128",
+        image=image,
+        prompt="把背景改成浅蓝色，保持主体不变",
+        size="1024x1024",
+    )
+
+print(edited.data[0].url)
+```
+
+## 视频任务
+
+OpenAI SDK 暂未提供通用视频任务方法，视频接口建议直接使用 HTTP 请求：
+
+```python
+import requests
+
+headers = {
+    "Authorization": "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+}
+
+resp = requests.post(
+    "https://api.chenyu.cn/v1/videos",
+    headers=headers,
+    json={
+        "model": "doubao-seedance-2-0-fast-260128",
+        "prompt": "一只白色机器人在未来城市街道上行走，电影感镜头",
+    },
+)
+task = resp.json()
+print(task["id"])
+
+result = requests.get(
+    f"https://api.chenyu.cn/v1/videos/{task['id']}",
+    headers=headers,
+)
+print(result.json())
+```

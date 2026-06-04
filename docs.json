@@ -88,17 +88,6 @@
             ]
           },
           {
-            "group": "工作流管理（草稿）",
-            "pages": [
-              "api-reference/workflow/market-list",
-              "api-reference/workflow/market-info",
-              "api-reference/workflow/run-submit",
-              "api-reference/workflow/run-list",
-              "api-reference/workflow/run-info",
-              "api-reference/workflow/run-execution"
-            ]
-          },
-          {
             "group": "余额管理",
             "pages": [
               "api-reference/balance/info"
@@ -126,6 +115,61 @@
             "group": "GPU管理",
             "pages": [
               "api-reference/gpu/list"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "工作流管理（未上线）",
+        "groups": [
+          {
+            "group": "工作流市场",
+            "pages": [
+              "api-reference/workflow/market-list",
+              "api-reference/workflow/market-info"
+            ]
+          },
+          {
+            "group": "运行管理",
+            "pages": [
+              "api-reference/workflow/run-submit",
+              "api-reference/workflow/run-list",
+              "api-reference/workflow/run-info",
+              "api-reference/workflow/run-execution"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "大模型网关（未上线）",
+        "groups": [
+          {
+            "group": "概览",
+            "pages": [
+              "llm-gateway/introduction"
+            ]
+          },
+          {
+            "group": "直接 API 调用",
+            "pages": [
+              "llm-gateway/direct-api",
+              "llm-gateway/api/models",
+              "llm-gateway/api/chat-completions",
+              "llm-gateway/api/responses",
+              "llm-gateway/api/image-generations",
+              "llm-gateway/api/image-edits",
+              "llm-gateway/api/embeddings",
+              "llm-gateway/api/video-create",
+              "llm-gateway/api/video-info",
+              "llm-gateway/api/video-content"
+            ]
+          },
+          {
+            "group": "SDK 与工具接入",
+            "pages": [
+              "llm-gateway/openai-sdk",
+              "llm-gateway/claude-code",
+              "llm-gateway/codex"
             ]
           }
         ]
