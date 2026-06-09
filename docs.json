@@ -158,7 +158,6 @@
               "llm-gateway/api/responses",
               "llm-gateway/api/image-generations",
               "llm-gateway/api/image-edits",
-              "llm-gateway/api/embeddings",
               "llm-gateway/api/video-create",
               "llm-gateway/api/video-info",
               "llm-gateway/api/video-content"
