@@ -8,9 +8,86 @@ icon: "terminal"
 
 Codex 使用自定义 provider 接入。晨羽智云网关为 Codex 单独提供 `/codex/v1/*` 路径，用于返回 Codex 模型目录并转发 Responses 请求。
 
-## 配置文件
+Codex 桌面 App、CLI 和 IDE 插件会共享用户级配置：
 
-在使用 Codex 的机器上编辑：
+```text
+~/.codex/config.toml
+```
+
+<Warning>
+  provider 和认证配置必须写在用户级 `~/.codex/config.toml`。不要写到项目里的 `.codex/config.toml`，Codex 会忽略项目级 provider/auth 配置。
+</Warning>
+
+## 一键配置
+
+推荐直接运行晨羽智云提供的配置脚本：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/cgf120/mintlify-docs/refs/heads/main/helper/codex-cli-setup.sh | bash
+```
+
+脚本会提示输入 API Key，并自动完成：
+
+- 创建 `~/.codex/chenyu-codex-key`，用于保存 API Key
+- 备份并更新 `~/.codex/config.toml`
+- 配置 `chenyu-codex` provider
+- 设置 `base_url = "https://api.chenyu.cn/codex/v1"`
+- 设置 `wire_api = "responses"`
+- 设置默认模型 `doubao-seed-2-0-lite-260428`
+
+如果当前终端不能交互输入，可以先设置环境变量：
+
+```bash
+export CHENYU_LLM_API_KEY="YOUR_API_KEY"
+curl -fsSL https://raw.githubusercontent.com/cgf120/mintlify-docs/refs/heads/main/helper/codex-cli-setup.sh | bash
+```
+
+<Note>
+  这个脚本只管理 `chenyu-codex` provider 和顶层 `model`、`model_provider` 配置，会保留已有的 MCP、sandbox、skills 等其它 Codex 配置。
+</Note>
+
+<Warning>
+  不要直接使用通用 OpenAI 兼容 `/v1` 配置脚本配置 Codex。Codex 需要使用晨羽智云专用地址 `https://api.chenyu.cn/codex/v1`，不能写成 `https://api.chenyu.cn/v1`。
+</Warning>
+
+## 安装 Codex
+
+如果已安装 Codex，可以跳过本节。
+
+<Tabs>
+  <Tab title="桌面 App">
+    下载并安装 Codex 桌面客户端。安装后先不要急着发送消息，先完成下面的 provider 配置。
+  </Tab>
+  <Tab title="CLI">
+    安装完成后确认命令可用：
+
+    ```bash
+    codex --version
+    ```
+  </Tab>
+</Tabs>
+
+## 手动配置
+
+如果不使用一键脚本，也可以按下面步骤手动配置。
+
+### 保存 API Key
+
+推荐把 API Key 保存为本地文件，再让 Codex 通过 `auth.command` 读取。这样从桌面 App 启动 Codex 时也能稳定读取到认证信息。
+
+```bash
+mkdir -p ~/.codex
+printf '%s' 'YOUR_API_KEY' > ~/.codex/chenyu-codex-key
+chmod 600 ~/.codex/chenyu-codex-key
+```
+
+<Warning>
+  `chenyu-codex-key` 文件中只写 API Key 本身，不要包含 `Bearer ` 前缀，也不要额外添加空格。
+</Warning>
+
+### 配置 provider
+
+编辑：
 
 ```text
 ~/.codex/config.toml
@@ -30,18 +107,55 @@ supports_websockets = false
 
 [model_providers.chenyu-codex.auth]
 command = "/bin/sh"
-args = ["-lc", "printf %s \"$CHENYU_LLM_API_KEY\""]
+args = ["-lc", "cat \"$HOME/.codex/chenyu-codex-key\""]
 refresh_interval_ms = 0
 ```
 
-## 启动
+关键配置说明：
 
-启动前设置 API Key：
+- `base_url` 必须是 `https://api.chenyu.cn/codex/v1`，不要写成 `/v1` 或 `/codex/v1/models`
+- `wire_api` 必须是 `responses`
+- `supports_websockets` 设为 `false`
+- `auth.command` 会在每次需要认证时读取本地 key 文件
+
+<Note>
+  如果只在终端或 CI 中使用 Codex，也可以改用环境变量认证。但桌面 App 从系统图标启动时通常读不到 shell 环境变量，因此更推荐使用上面的 key 文件方式。
+</Note>
+
+## 验证配置
+
+### 验证模型列表
 
 ```bash
-export CHENYU_LLM_API_KEY="YOUR_API_KEY"
-codex
+codex debug models
 ```
+
+正常情况下会看到晨羽智云模型，例如：
+
+```text
+doubao-seed-2-0-lite-260428
+doubao-seed-2-0-mini-260428
+doubao-seed-2-0-pro-260215
+```
+
+### 验证对话调用
+
+```bash
+codex exec --skip-git-repo-check --ephemeral --sandbox read-only "只回复 OK"
+```
+
+如果最终输出 `OK`，说明模型列表和实际调用都已接入成功。
+
+## 启动桌面 App
+
+配置完成后，完整退出并重新打开 Codex 桌面 App，让它重新加载 `~/.codex/config.toml`：
+
+```bash
+osascript -e 'tell application "Codex" to quit'
+open -a Codex
+```
+
+进入桌面 App 后，选择项目目录，确认使用本地执行模式，然后发送消息即可。
 
 ## 模型选择
 
@@ -77,3 +191,53 @@ Codex 会发送一些 OpenAI Responses 专属字段。网关会自动处理常�
 - 隐藏 Codex 内置的官方默认模型
 
 如果第二轮对话出现上游参数错误，请确认正在使用 `/codex/v1` 路径，并确认文档中的 `auth.command` 配置已完整保留。
+
+## 常见问题
+
+### `codex` 命令不存在
+
+确认 Codex CLI 已安装，并检查常见安装路径是否在 `PATH` 中：
+
+```bash
+command -v codex
+```
+
+如果桌面 App 已安装，但终端中没有 `codex` 命令，可以尝试直接使用桌面 App 内置命令：
+
+```bash
+/Applications/Codex.app/Contents/Resources/codex --version
+```
+
+### 401 Unauthorized
+
+通常是 API Key 无效或 key 文件内容格式不正确。请确认：
+
+- `~/.codex/chenyu-codex-key` 中只包含 API Key
+- 没有写入 `Bearer `
+- 没有写入额外的 `sk ` 前缀
+- API Key 未被禁用，并且账户可用
+
+### 桌面 App 没有读取新配置
+
+完整退出并重新打开桌面 App：
+
+```bash
+osascript -e 'tell application "Codex" to quit'
+open -a Codex
+```
+
+### 桌面 App 可以打开，但回复显示异常
+
+先用 CLI 验证：
+
+```bash
+codex debug models
+codex exec --skip-git-repo-check --ephemeral --sandbox read-only "只回复 OK"
+```
+
+如果 CLI 正常但桌面 App 显示异常，请联系技术支持，并提供 Codex 日志中的错误信息。常见相关日志包括：
+
+```text
+OutputTextDelta without active item
+ReasoningSummaryDelta without active item
+```
