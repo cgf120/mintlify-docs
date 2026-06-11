@@ -67,61 +67,6 @@ curl -fsSL https://raw.githubusercontent.com/cgf120/mintlify-docs/refs/heads/mai
   </Tab>
 </Tabs>
 
-## 手动配置
-
-如果不使用一键脚本，也可以按下面步骤手动配置。
-
-### 保存 API Key
-
-推荐把 API Key 保存为本地文件，再让 Codex 通过 `auth.command` 读取。这样从桌面 App 启动 Codex 时也能稳定读取到认证信息。
-
-```bash
-mkdir -p ~/.codex
-printf '%s' 'YOUR_API_KEY' > ~/.codex/chenyu-codex-key
-chmod 600 ~/.codex/chenyu-codex-key
-```
-
-<Warning>
-  `chenyu-codex-key` 文件中只写 API Key 本身，不要包含 `Bearer ` 前缀，也不要额外添加空格。
-</Warning>
-
-### 配置 provider
-
-编辑：
-
-```text
-~/.codex/config.toml
-```
-
-写入：
-
-```toml
-model = "doubao-seed-2-0-lite-260428"
-model_provider = "chenyu-codex"
-
-[model_providers.chenyu-codex]
-name = "Chenyu Codex"
-base_url = "https://api.chenyu.cn/codex/v1"
-wire_api = "responses"
-supports_websockets = false
-
-[model_providers.chenyu-codex.auth]
-command = "/bin/sh"
-args = ["-lc", "cat \"$HOME/.codex/chenyu-codex-key\""]
-refresh_interval_ms = 0
-```
-
-关键配置说明：
-
-- `base_url` 必须是 `https://api.chenyu.cn/codex/v1`，不要写成 `/v1` 或 `/codex/v1/models`
-- `wire_api` 必须是 `responses`
-- `supports_websockets` 设为 `false`
-- `auth.command` 会在每次需要认证时读取本地 key 文件
-
-<Note>
-  如果只在终端或 CI 中使用 Codex，也可以改用环境变量认证。但桌面 App 从系统图标启动时通常读不到 shell 环境变量，因此更推荐使用上面的 key 文件方式。
-</Note>
-
 ## 验证配置
 
 ### 验证模型列表
@@ -190,7 +135,7 @@ Codex 会发送一些 OpenAI Responses 专属字段。网关会自动处理常�
 - 过滤上游不支持的工具类型
 - 隐藏 Codex 内置的官方默认模型
 
-如果第二轮对话出现上游参数错误，请确认正在使用 `/codex/v1` 路径，并确认文档中的 `auth.command` 配置已完整保留。
+如果第二轮对话出现上游参数错误，请重新运行一键配置脚本，确认 Codex 使用的是 `https://api.chenyu.cn/codex/v1`。
 
 ## 常见问题
 
