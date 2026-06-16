@@ -14,7 +14,7 @@ authMethod: "bearer"
 </Warning>
 
 <Info>
-  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。本地文件建议先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，再把返回的 `asset_uri` 字段值放入 `inputs`。
+  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。需要声明素材角色或在提示词中引用素材时，使用 `{ "uri": "...", "role": "reference_image", "label": "人物A" }`。本地文件建议先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，再把返回的 `asset_uri` 字段值放入 `inputs`。
 </Info>
 
 ## 请求参数
@@ -156,8 +156,14 @@ payload = {
     "inputs": {
         "generation_category": "reference_to_video",
         "model": "doubao-seedance-2-0-fast-260128",
-        "prompt": "cinematic portrait video",
-        "images": ["asset://asset_reference_image"],
+        "prompt": "@人物A cinematic portrait video",
+        "images": [
+            {
+                "uri": "asset://asset_reference_image",
+                "label": "人物A",
+                "role": "reference_image"
+            }
+        ],
         "contains_real_person_material": true,
         "resolution": "720p",
         "duration": "5"
@@ -180,8 +186,12 @@ axios.post('https://www.chenyu.cn/api/open/v2/workflow/run/submit', {
   inputs: {
     generation_category: 'reference_to_video',
     model: 'doubao-seedance-2-0-fast-260128',
-    prompt: 'cinematic portrait video',
-    images: ['asset://asset_reference_image'],
+    prompt: '@人物A cinematic portrait video',
+    images: [{
+      uri: 'asset://asset_reference_image',
+      label: '人物A',
+      role: 'reference_image'
+    }],
     contains_real_person_material: true,
     resolution: '720p',
     duration: '5'
@@ -208,8 +218,14 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
     "inputs": {
       "generation_category": "reference_to_video",
       "model": "doubao-seedance-2-0-fast-260128",
-      "prompt": "cinematic portrait video",
-      "images": ["asset://asset_reference_image"],
+      "prompt": "@人物A cinematic portrait video",
+      "images": [
+        {
+          "uri": "asset://asset_reference_image",
+          "label": "人物A",
+          "role": "reference_image"
+        }
+      ],
       "contains_real_person_material": true,
       "resolution": "720p",
       "duration": "5"
@@ -220,6 +236,45 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
 ```
 
 </CodeGroup>
+
+## 提示词引用素材
+
+历史 Seedance 工作流或外部视频模型工作流支持在 `inputs` 的资源对象中传 `label`，并在 `inputs.prompt` 中使用 `@label` 指向该素材。
+
+```json
+{
+  "workflow_id": "wf_xxx",
+  "revision_id": "wfr_xxx",
+  "idempotency_key": "run_20260613_ref_001",
+  "inputs": {
+    "generation_category": "reference_to_video",
+    "model": "doubao-seedance-2-0-fast-260128",
+    "prompt": "@阿九 携手 @沈渡 跳舞",
+    "images": [
+      {
+        "uri": "asset://asset_a252553f9364ad0fa635cb7c48793491",
+        "label": "阿九",
+        "role": "reference_image"
+      },
+      {
+        "uri": "asset://asset_cf7584e3e836a2b3ee65ef072a71fdd6",
+        "label": "沈渡",
+        "role": "reference_image"
+      }
+    ],
+    "duration": 5,
+    "resolution": "720p",
+    "ratio": "16:9"
+  }
+}
+```
+
+说明：
+
+- `label` 建议直接写显示名，例如 `阿九`，不需要带 `@`
+- `prompt` 中写 `@阿九`，也兼容 `{{阿九}}` 和 `{{ 阿九 }}`
+- 同一个请求里 `label` 不能重复
+- 服务端会把自定义标签绑定到当前请求中的资源顺序，例如图片会映射为上游需要的 `@图1`、`@图2`
 
 ## 响应示例
 

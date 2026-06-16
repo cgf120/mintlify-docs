@@ -14,7 +14,7 @@ authMethod: "bearer"
 </Warning>
 
 <Info>
-  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。本地文件建议先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，再把返回的 `asset_uri` 字段值放入 `inputs`。
+  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。需要声明素材角色或在提示词中引用素材时，使用 `{ "uri": "...", "role": "reference_image", "label": "人物A" }`。本地文件建议先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，再把返回的 `asset_uri` 字段值放入 `inputs`。
 </Info>
 
 ## 请求参数
@@ -44,11 +44,23 @@ authMethod: "bearer"
 </ParamField>
 
 <ParamField body="inputs.first_frame" type="object">
-  首帧图片。图生视频或首尾帧视频必填
+  首帧图片。图生视频或首尾帧视频必填。支持资源字符串，也支持 `{ "uri": "...", "role": "first_frame", "label": "首帧" }`
 </ParamField>
 
 <ParamField body="inputs.last_frame" type="object">
-  尾帧图片。首尾帧视频必填
+  尾帧图片。首尾帧视频必填。支持资源字符串，也支持 `{ "uri": "...", "role": "last_frame", "label": "尾帧" }`
+</ParamField>
+
+<ParamField body="inputs.images" type="array">
+  参考图片列表。数组元素支持公网 URL、data URL、`asset://asset_xxx`，也支持带 `uri`、`role` 和 `label` 的对象。传 `label` 后可在 `inputs.prompt` 中用 `@label` 引用该素材
+</ParamField>
+
+<ParamField body="inputs.videos" type="array">
+  参考视频列表。对象写法支持 `uri`、`role` 和 `label`
+</ParamField>
+
+<ParamField body="inputs.audios" type="array">
+  参考音频列表。对象写法支持 `uri`、`role` 和 `label`
 </ParamField>
 
 <ParamField body="inputs.duration" type="integer">
@@ -160,6 +172,43 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/model-runs/videos" \
 ```
 
 </CodeGroup>
+
+## 提示词引用素材
+
+多模态参考生视频时，推荐给每个需要被提示词点名的素材设置 `label`。`label` 不需要带 `@`，提示词中引用时再写 `@label`。
+
+```json
+{
+  "idempotency_key": "video_20260613_ref_001",
+  "inputs": {
+    "model": "doubao-seedance-2-0-fast-260128",
+    "generation_category": "reference_to_video",
+    "prompt": "@阿九 携手 @沈渡 跳舞",
+    "images": [
+      {
+        "uri": "asset://asset_a252553f9364ad0fa635cb7c48793491",
+        "label": "阿九",
+        "role": "reference_image"
+      },
+      {
+        "uri": "asset://asset_cf7584e3e836a2b3ee65ef072a71fdd6",
+        "label": "沈渡",
+        "role": "reference_image"
+      }
+    ],
+    "duration": 5,
+    "resolution": "720p",
+    "ratio": "16:9"
+  }
+}
+```
+
+说明：
+
+- `label` 会被服务端去掉首尾空格和可选的 `@` 前缀，建议直接写 `阿九`
+- `prompt` 中支持 `@阿九`，也兼容 `{{阿九}}` 和 `{{ 阿九 }}`
+- 同一个请求里 `label` 不能重复
+- 服务端会把自定义标签绑定到当前请求中的资源顺序，例如图片会映射为上游需要的 `@图1`、`@图2`
 
 ## 响应示例
 

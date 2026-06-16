@@ -15,7 +15,7 @@ authMethod: "bearer"
 
 ## 图片资源支持形式
 
-大模型网关对外统一推荐两种写法：普通字段直接传资源字符串；只有需要声明素材角色时，才使用 `{ "uri": "...", "role": "..." }` 对象。
+大模型网关对外统一推荐两种写法：普通字段直接传资源字符串；需要声明素材角色或在提示词里引用素材时，使用 `{ "uri": "...", "role": "...", "label": "..." }` 对象。
 
 ### 公网 URL
 
@@ -47,18 +47,21 @@ authMethod: "bearer"
 }
 ```
 
-### 带角色对象
+### 带角色或引用标签的对象
 
-只有需要声明首帧、尾帧、参考图等素材角色时，才使用对象写法。对象里统一使用 `uri` 存资源字符串。
+只有需要声明首帧、尾帧、参考图等素材角色，或需要在提示词里用 `@标签` 指向素材时，才使用对象写法。对象里统一使用 `uri` 存资源字符串。
 
 ```json
 {
   "first_frame": {
     "uri": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
-    "role": "first_frame"
+    "role": "first_frame",
+    "label": "首帧"
   }
 }
 ```
+
+`label` 是素材显示名，不需要带 `@`。在 `prompt` 里用 `@首帧` 引用时，服务端会把它绑定到当前请求中的这张图片。
 
 ## 支持图片资源的字段
 
@@ -239,13 +242,38 @@ curl -X POST "https://api.chenyu.cn/v1/assets" \
 }
 ```
 
-需要声明素材角色时，可以使用对象写法：
+需要声明素材角色，或需要在提示词里用 `@标签` 引用素材时，可以使用对象写法：
 
 ```json
 {
   "first_frame": {
     "uri": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
-    "role": "first_frame"
+    "role": "first_frame",
+    "label": "首帧"
   }
 }
 ```
+
+多素材引用示例：
+
+```json
+{
+  "model": "doubao-seedance-2-0-fast-260128",
+  "generation_category": "reference_to_video",
+  "prompt": "@阿九 和 @沈渡 在舞台上跳舞",
+  "images": [
+    {
+      "uri": "asset://asset_person_a",
+      "label": "阿九",
+      "role": "reference_image"
+    },
+    {
+      "uri": "asset://asset_person_b",
+      "label": "沈渡",
+      "role": "reference_image"
+    }
+  ]
+}
+```
+
+同一个请求里的 `label` 不能重复；`label` 可写成 `阿九`，不要写成普通文本占位。提示词中引用时写 `@阿九`，也兼容 `{{阿九}}`。

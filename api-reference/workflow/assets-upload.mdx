@@ -10,7 +10,7 @@ authMethod: "bearer"
 上传图片、视频、音频或文件，生成可在工作流 `inputs` 中使用的临时资源地址。适用于文件较大、需要复用、或不方便直接暴露公网 URL 的场景。
 
 <Info>
-  上传成功后使用返回的 `asset_uri` 字段值，例如 `asset://asset_xxx`。提交工作流时直接把这个字符串放入 `inputs`，不需要再包一层对象。临时资源默认 48 小时有效。
+  上传成功后使用返回的 `asset_uri` 字段值，例如 `asset://asset_xxx`。提交工作流时可以直接把这个字符串放入 `inputs`。需要声明素材角色或在提示词里引用素材时，使用 `{ "uri": "...", "role": "...", "label": "..." }` 对象。临时资源默认 48 小时有效。
 </Info>
 
 ## 请求参数
@@ -193,13 +193,37 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/assets" \
 }
 ```
 
-需要声明首帧、尾帧或参考素材角色时，可以使用对象写法：
+需要声明首帧、尾帧、参考素材角色，或需要在提示词里用 `@标签` 引用素材时，可以使用对象写法：
 
 ```json
 {
   "first_frame": {
     "uri": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
-    "role": "first_frame"
+    "role": "first_frame",
+    "label": "首帧"
   }
 }
 ```
+
+多素材引用示例：
+
+```json
+{
+  "generation_category": "reference_to_video",
+  "prompt": "@阿九 和 @沈渡 在舞台上跳舞",
+  "images": [
+    {
+      "uri": "asset://asset_person_a",
+      "label": "阿九",
+      "role": "reference_image"
+    },
+    {
+      "uri": "asset://asset_person_b",
+      "label": "沈渡",
+      "role": "reference_image"
+    }
+  ]
+}
+```
+
+`label` 是素材显示名，不需要带 `@`；提示词里引用时写 `@阿九`。同一个请求里的 `label` 不能重复，也兼容 `{{阿九}}` 和 `{{ 阿九 }}` 写法。

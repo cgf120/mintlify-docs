@@ -14,7 +14,7 @@ authMethod: "bearer"
 </Info>
 
 <Info>
-  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。需要声明素材角色时，使用 `{ "uri": "...", "role": "first_frame" }`。本地文件建议先调用 [上传资源](/llm-gateway/api/assets-upload)，再把返回的 `asset_uri` 字段值放入请求参数。
+  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。需要声明素材角色或在提示词中引用素材时，使用 `{ "uri": "...", "role": "reference_image", "label": "人物A" }`。本地文件建议先调用 [上传资源](/llm-gateway/api/assets-upload)，再把返回的 `asset_uri` 字段值放入请求参数。
 </Info>
 
 ## 请求格式
@@ -48,7 +48,7 @@ authMethod: "bearer"
 </ParamField>
 
 <ParamField body="images" type="array">
-  参考图片列表。数组元素支持公网 URL、data URL、`asset://asset_xxx`，也支持带 `uri` 和 `role` 的对象
+  参考图片列表。数组元素支持公网 URL、data URL、`asset://asset_xxx`，也支持带 `uri`、`role` 和 `label` 的对象。传 `label` 后可在 `prompt` 中用 `@label` 引用该素材
 </ParamField>
 
 <ParamField body="reference_images" type="array">
@@ -56,11 +56,11 @@ authMethod: "bearer"
 </ParamField>
 
 <ParamField body="videos" type="array">
-  参考视频列表。多模态参考生视频使用，具体支持范围以模型为准
+  参考视频列表。多模态参考生视频使用，具体支持范围以模型为准。对象写法支持 `uri`、`role` 和 `label`
 </ParamField>
 
 <ParamField body="audios" type="array">
-  参考音频列表。多模态参考生视频使用，具体支持范围以模型为准
+  参考音频列表。多模态参考生视频使用，具体支持范围以模型为准。对象写法支持 `uri`、`role` 和 `label`
 </ParamField>
 
 <ParamField body="duration" type="integer | string">
@@ -250,16 +250,53 @@ curl -X POST "https://api.chenyu.cn/v1/videos" \
 {
   "model": "doubao-seedance-2-0-fast-260128",
   "generation_category": "reference_to_video",
-  "prompt": "根据参考素材生成电影感产品视频",
+  "prompt": "@人物A 和 @人物B 在画面中自然互动，保持人物特征一致",
   "images": [
-    "asset://asset_reference_image_1",
     {
-      "uri": "https://example.com/reference-2.png",
+      "uri": "asset://asset_person_a",
+      "label": "人物A",
+      "role": "reference_image"
+    },
+    {
+      "uri": "asset://asset_person_b",
+      "label": "人物B",
       "role": "reference_image"
     }
   ],
   "videos": ["asset://asset_reference_video_1"],
   "audios": ["asset://asset_reference_audio_1"],
+  "duration": 5,
+  "resolution": "720p",
+  "ratio": "16:9"
+}
+```
+
+## 提示词引用素材
+
+当提示词需要明确指向某张图片、某段视频或某段音频时，在资源对象里增加 `label`，并在 `prompt` 中用 `@label` 引用。
+
+- `label` 建议直接写显示名，例如 `人物A`，不需要带 `@`
+- `prompt` 中写 `@人物A`，也兼容 `{{人物A}}` 和 `{{ 人物A }}`
+- 同一个请求里 `label` 不能重复
+- 服务端会把用户自定义标签改写成上游模型需要的内部引用，例如 `@人物A` 会对应到该请求中的 `@图1`
+
+```json
+{
+  "model": "doubao-seedance-2-0-fast-260128",
+  "generation_category": "reference_to_video",
+  "prompt": "@阿九 携手 @沈渡 跳舞",
+  "images": [
+    {
+      "uri": "asset://asset_a252553f9364ad0fa635cb7c48793491",
+      "label": "阿九",
+      "role": "reference_image"
+    },
+    {
+      "uri": "asset://asset_cf7584e3e836a2b3ee65ef072a71fdd6",
+      "label": "沈渡",
+      "role": "reference_image"
+    }
+  ],
   "duration": 5,
   "resolution": "720p",
   "ratio": "16:9"

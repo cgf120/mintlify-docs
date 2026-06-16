@@ -10,7 +10,7 @@ authMethod: "bearer"
 使用 OpenAI Images Edit 兼容格式编辑图片。请求支持 `multipart/form-data` 文件上传，也支持 JSON 中传图片资源地址。
 
 <Info>
-  JSON 请求里的图片字段统一传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。本地文件可直接使用 `multipart/form-data` 上传，也可以先调用 [上传资源](/llm-gateway/api/assets-upload) 获取 `asset_uri` 后再提交 JSON。
+  JSON 请求里的图片字段可以直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。需要在提示词中引用某张素材时，使用 `{ "uri": "...", "label": "原图" }`。本地文件可直接使用 `multipart/form-data` 上传，也可以先调用 [上传资源](/llm-gateway/api/assets-upload) 获取 `asset_uri` 后再提交 JSON。
 </Info>
 
 ## 请求参数
@@ -20,11 +20,11 @@ authMethod: "bearer"
 </ParamField>
 
 <ParamField body="image" type="file | string" required>
-  待编辑图片。`multipart/form-data` 请求中使用文件；JSON 请求中直接传资源字符串：公网 URL、data URL 或 `asset://asset_xxx`
+  待编辑图片。`multipart/form-data` 请求中使用文件；JSON 请求中可传资源字符串：公网 URL、data URL 或 `asset://asset_xxx`。需要在 `prompt` 中引用时，可传 `{ "uri": "...", "label": "原图" }`
 </ParamField>
 
 <ParamField body="images" type="array">
-  多张待编辑图片。数组元素支持与 `image` 相同的 JSON 写法
+  多张待编辑图片。数组元素支持与 `image` 相同的 JSON 写法；每个对象可以设置不同 `label`
 </ParamField>
 
 <ParamField body="mask" type="file | string">
@@ -121,6 +121,20 @@ curl -X POST "https://api.chenyu.cn/v1/images/edits" \
   "prompt": "把背景改成浅蓝色，保持主体不变",
   "size": "1024x1024",
   "image": "asset://asset_input_image"
+}
+```
+
+需要在提示词里明确引用素材时：
+
+```json
+{
+  "model": "doubao-seedream-5-0-lite-260128",
+  "prompt": "保留 @原图 的主体，把背景改成浅蓝色",
+  "size": "1024x1024",
+  "image": {
+    "uri": "asset://asset_input_image",
+    "label": "原图"
+  }
 }
 ```
 
