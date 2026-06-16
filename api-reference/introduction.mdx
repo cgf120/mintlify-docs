@@ -58,6 +58,9 @@ Authorization: Bearer YOUR_API_KEY
   <Card title="工作流管理" icon="sparkles" href="/api-reference/workflow/market-list">
     查询工作流市场、提交运行任务、获取进度日志和输出结果
   </Card>
+  <Card title="外部模型任务" icon="video" href="/api-reference/model-runs/video-submit">
+    通过应用接口提交外部视频模型任务，查询状态、输出、扣费和任务记录
+  </Card>
 </CardGroup>
 
 ## 核心功能
@@ -110,6 +113,16 @@ graph LR
 - `GET /api/open/v2/workflow/run/list` - 查询工作流运行列表
 - `GET /api/open/v2/workflow/run/info` - 查询工作流运行详情
 - `GET /api/open/v2/workflow/run/execution` - 查询执行进度、日志和输出结果
+
+### 外部模型任务
+
+外部视频模型任务通过独立的 `model-runs` 接口提交和查询。该接口适合通过晨羽智云应用层使用 Seedance、Kling 等外部模型能力；ComfyUI 工作流仍使用工作流管理接口。
+
+- `POST /api/open/v2/model-runs/videos` - 提交外部视频模型任务
+- `GET /api/open/v2/model-runs/list` - 查询外部模型任务列表
+- `GET /api/open/v2/model-runs/info` - 查询外部模型任务详情
+- `POST /api/open/v2/model-runs/cancel` - 取消外部模型任务
+- `GET /api/open/v2/model-runs/events` - 查询外部模型任务记录
 
 ## 快速开始
 

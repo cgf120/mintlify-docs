@@ -1,0 +1,63 @@
+---
+title: "查询外部模型任务列表"
+api: "GET https://www.chenyu.cn/api/open/v2/model-runs/list"
+description: "查询当前 API Key 提交的外部模型任务"
+authMethod: "bearer"
+---
+
+# 查询外部模型任务列表
+
+查询当前 API Key 提交的外部模型任务。只返回通过 `model-runs` 开放接口创建的任务，不包含 ComfyUI 工作流任务。
+
+## 请求参数
+
+<ParamField query="status" type="string">
+  按任务状态过滤：`created`、`queued`、`running`、`completed`、`failed`、`cancelled`
+</ParamField>
+
+<ParamField query="page" type="integer">
+  页码，默认 `1`
+</ParamField>
+
+<ParamField query="page_size" type="integer">
+  每页数量，默认 `20`，最大 `100`
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="data.total" type="integer">
+  总数量
+</ResponseField>
+
+<ResponseField name="data.items" type="array">
+  任务列表。字段同 [查询外部模型任务详情](/api-reference/model-runs/info)
+</ResponseField>
+
+## 代码示例
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/model-runs/list?status=queued&page=1&page_size=20" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "total": 1,
+    "items": [
+      {
+        "run_id": "modelrun_1782000000000000000_ab12cd34",
+        "model": "doubao-seedance-2-0-260128",
+        "status": "queued",
+        "settlement_status": "pending",
+        "frozen_amount": "0.60000000",
+        "created_at": "2026-06-13 10:00:00"
+      }
+    ]
+  }
+}
+```

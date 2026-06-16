@@ -1,0 +1,182 @@
+---
+title: "提交外部视频模型任务"
+api: "POST https://www.chenyu.cn/api/open/v2/model-runs/videos"
+description: "通过晨羽智云应用接口提交外部视频模型任务"
+authMethod: "bearer"
+---
+
+# 提交外部视频模型任务
+
+通过 `cpn-ai` 应用接口提交外部视频模型任务。平台会先完成 API Key 认证和余额预扣，再把任务提交到大模型网关执行。任务完成后按真实结果结算，失败或取消会释放预扣。
+
+<Warning>
+  `idempotency_key` 必填。相同 API Key 和相同幂等键的重复请求会返回同一笔任务，避免网络重试造成重复提交和重复预扣。
+</Warning>
+
+<Info>
+  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。本地文件建议先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，再把返回的 `asset_uri` 字段值放入 `inputs`。
+</Info>
+
+## 请求参数
+
+<ParamField body="idempotency_key" type="string" required>
+  幂等键，由调用方生成。建议使用业务订单号、请求流水号或 UUID
+</ParamField>
+
+<ParamField body="request_id" type="string">
+  调用方请求 ID。不传时默认使用 `idempotency_key`
+</ParamField>
+
+<ParamField body="inputs" type="object" required>
+  外部模型输入参数
+</ParamField>
+
+<ParamField body="inputs.model" type="string" required>
+  视频模型 ID。可通过大模型网关模型列表查询支持视频的模型
+</ParamField>
+
+<ParamField body="inputs.prompt" type="string" required>
+  视频生成提示词
+</ParamField>
+
+<ParamField body="inputs.generation_category" type="string">
+  生成方式。常用值：`text_to_video`、`first_frame_to_video`、`first_last_frame_to_video`
+</ParamField>
+
+<ParamField body="inputs.first_frame" type="object">
+  首帧图片。图生视频或首尾帧视频必填
+</ParamField>
+
+<ParamField body="inputs.last_frame" type="object">
+  尾帧图片。首尾帧视频必填
+</ParamField>
+
+<ParamField body="inputs.duration" type="integer">
+  视频时长，单位秒
+</ParamField>
+
+<ParamField body="inputs.resolution" type="string">
+  输出分辨率，例如 `480p`、`720p`、`1080p`。具体支持范围以模型为准
+</ParamField>
+
+<ParamField body="inputs.ratio" type="string">
+  画面比例，例如 `16:9`、`9:16`、`1:1`
+</ParamField>
+
+<ParamField body="inputs.contains_real_person_material" type="boolean">
+  输入图片或视频素材包含真人并需要进行素材备案时传 `true`
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码，`0` 表示成功
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  任务信息
+
+  <Expandable title="data">
+    <ResponseField name="run_id" type="string">
+      应用任务 ID。后续查询列表、详情、事件和取消均使用该 ID
+    </ResponseField>
+
+    <ResponseField name="gateway_task_id" type="string">
+      大模型网关任务 ID
+    </ResponseField>
+
+    <ResponseField name="model" type="string">
+      模型 ID
+    </ResponseField>
+
+    <ResponseField name="provider" type="string">
+      供应商标识
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      任务状态：`created`、`queued`、`running`、`completed`、`failed`、`cancelled`
+    </ResponseField>
+
+    <ResponseField name="settlement_status" type="string">
+      结算状态：`pending`、`settled`、`released`
+    </ResponseField>
+
+    <ResponseField name="frozen_amount" type="string">
+      预扣金额
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import uuid
+import requests
+
+url = "https://www.chenyu.cn/api/open/v2/model-runs/videos"
+headers = {
+    "Authorization": "Bearer your_api_key",
+    "Content-Type": "application/json"
+}
+payload = {
+    "idempotency_key": str(uuid.uuid4()),
+    "inputs": {
+        "model": "doubao-seedance-2-0-260128",
+        "generation_category": "first_frame_to_video",
+        "prompt": "闪白转场，女主在茶园悠闲采茶",
+        "first_frame": "asset://asset_first_frame",
+        "duration": 5,
+        "resolution": "720p",
+        "ratio": "16:9",
+        "contains_real_person_material": True
+    }
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json()["data"]["run_id"])
+```
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/model-runs/videos" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idempotency_key": "video_20260613_001",
+    "inputs": {
+      "model": "doubao-seedance-2-0-260128",
+      "generation_category": "text_to_video",
+      "prompt": "一只白色机器人在未来城市街道上行走",
+      "duration": 5,
+      "resolution": "720p",
+      "ratio": "16:9"
+    }
+  }'
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "提交成功",
+  "data": {
+    "run_id": "modelrun_1782000000000000000_ab12cd34",
+    "request_id": "video_20260613_001",
+    "endpoint": "videos",
+    "model": "doubao-seedance-2-0-260128",
+    "provider": "volc",
+    "gateway_task_id": "vid_1782000000000000000_ef56ab78",
+    "status": "queued",
+    "settlement_status": "pending",
+    "frozen_amount": "0.60000000"
+  }
+}
+```

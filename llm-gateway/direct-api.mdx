@@ -27,6 +27,9 @@ Content-Type: application/json
   <Card title="模型列表" icon="list" href="/llm-gateway/api/models">
     查询当前 API Key 可用的大模型列表
   </Card>
+  <Card title="资源上传" icon="upload" href="/llm-gateway/api/assets-upload">
+    上传图片、视频、音频或文件，获取可用于模型请求的 asset:// 地址
+  </Card>
   <Card title="文本与多模态对话" icon="message" href="/llm-gateway/api/chat-completions">
     使用 OpenAI Chat Completions 格式调用文本和视觉模型
   </Card>
@@ -40,7 +43,7 @@ Content-Type: application/json
     上传图片并按提示词编辑
   </Card>
   <Card title="视频任务" icon="video" href="/llm-gateway/api/video-create">
-    创建视频生成任务并查询结果
+    创建、查询和取消异步视频生成任务
   </Card>
 </CardGroup>
 

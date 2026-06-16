@@ -116,6 +116,16 @@
             "pages": [
               "api-reference/gpu/list"
             ]
+          },
+          {
+            "group": "外部模型任务",
+            "pages": [
+              "api-reference/model-runs/video-submit",
+              "api-reference/model-runs/list",
+              "api-reference/model-runs/info",
+              "api-reference/model-runs/cancel",
+              "api-reference/model-runs/events"
+            ]
           }
         ]
       },
@@ -137,6 +147,13 @@
               "api-reference/workflow/run-info",
               "api-reference/workflow/run-execution"
             ]
+          },
+          {
+            "group": "资源管理",
+            "pages": [
+              "api-reference/workflow/assets-upload",
+              "api-reference/workflow/assets-info"
+            ]
           }
         ]
       },
@@ -154,12 +171,15 @@
             "pages": [
               "llm-gateway/direct-api",
               "llm-gateway/api/models",
+              "llm-gateway/api/assets-upload",
+              "llm-gateway/api/assets-info",
               "llm-gateway/api/chat-completions",
               "llm-gateway/api/responses",
               "llm-gateway/api/image-generations",
               "llm-gateway/api/image-edits",
               "llm-gateway/api/video-create",
               "llm-gateway/api/video-info",
+              "llm-gateway/api/video-cancel",
               "llm-gateway/api/video-content"
             ]
           },

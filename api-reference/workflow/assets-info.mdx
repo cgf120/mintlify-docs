@@ -1,0 +1,136 @@
+---
+title: "查询工作流资源"
+api: "GET https://www.chenyu.cn/api/open/v2/assets/{asset_id}"
+description: "查询工作流资源状态和访问地址"
+authMethod: "bearer"
+---
+
+# 查询工作流资源
+
+根据资源 ID 查询资源状态、引用地址和访问地址。资源过期、无权限或审核未通过时，接口会返回错误信息。
+
+## 请求参数
+
+<ParamField path="asset_id" type="string" required>
+  资源 ID，例如 `asset_38d2ff7769fb3b7267039941547e6a78`
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="code" type="integer">
+  响应码，`0` 表示成功
+</ResponseField>
+
+<ResponseField name="msg" type="string">
+  响应信息
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  资源信息
+
+  <Expandable title="data">
+    <ResponseField name="asset_id" type="string">
+      资源 ID
+    </ResponseField>
+
+    <ResponseField name="asset_uri" type="string">
+      资源引用地址，提交工作流 `inputs` 时优先使用
+    </ResponseField>
+
+    <ResponseField name="url" type="string">
+      资源访问地址
+    </ResponseField>
+
+    <ResponseField name="signed_url" type="string">
+      带签名的临时访问地址
+    </ResponseField>
+
+    <ResponseField name="media_type" type="string">
+      资源类型
+    </ResponseField>
+
+    <ResponseField name="mime_type" type="string">
+      MIME 类型
+    </ResponseField>
+
+    <ResponseField name="size_bytes" type="integer">
+      文件大小，单位字节
+    </ResponseField>
+
+    <ResponseField name="purpose" type="string">
+      资源用途
+    </ResponseField>
+
+    <ResponseField name="persistent" type="boolean">
+      是否为长期资源
+    </ResponseField>
+
+    <ResponseField name="expires_at" type="string">
+      临时资源过期时间
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      资源状态
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+asset_id = "asset_38d2ff7769fb3b7267039941547e6a78"
+url = f"https://www.chenyu.cn/api/open/v2/assets/{asset_id}"
+headers = {"Authorization": "Bearer your_api_key"}
+
+response = requests.get(url, headers=headers)
+print(response.json()["data"]["asset_uri"])
+```
+
+```javascript JavaScript
+const axios = require('axios');
+
+const assetId = 'asset_38d2ff7769fb3b7267039941547e6a78';
+
+axios.get(`https://www.chenyu.cn/api/open/v2/assets/${assetId}`, {
+  headers: {
+    Authorization: 'Bearer your_api_key'
+  }
+}).then((response) => {
+  console.log(response.data.data.asset_uri);
+});
+```
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/assets/asset_38d2ff7769fb3b7267039941547e6a78" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "asset_id": "asset_38d2ff7769fb3b7267039941547e6a78",
+    "asset_uri": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
+    "url": "https://www.chenyu.team/assets/asset_38d2ff7769fb3b7267039941547e6a78/content",
+    "content_url": "https://www.chenyu.team/assets/asset_38d2ff7769fb3b7267039941547e6a78/content",
+    "signed_url": "https://www.chenyu.team/assets/asset_38d2ff7769fb3b7267039941547e6a78/content?expires=1781295600&signature=xxxx",
+    "media_type": "image",
+    "mime_type": "image/png",
+    "size_bytes": 102400,
+    "purpose": "temp_input",
+    "persistent": false,
+    "expires_at": "2026-06-16T12:00:00+08:00",
+    "status": "confirmed",
+    "original_filename": "input.png"
+  }
+}
+```

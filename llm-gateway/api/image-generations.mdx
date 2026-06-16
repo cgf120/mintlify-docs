@@ -9,6 +9,10 @@ authMethod: "bearer"
 
 使用 OpenAI Images 兼容格式生成图片。
 
+<Info>
+  支持在 `reference_image`、`reference_images`、`image`、`images`、`input_image`、`input_image_url`、`mask` 等字段中传入图片资源。图片资源可以是公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`，详见 [上传资源](/llm-gateway/api/assets-upload)。
+</Info>
+
 ## 请求参数
 
 <ParamField body="model" type="string" required>
@@ -29,6 +33,14 @@ authMethod: "bearer"
 
 <ParamField body="response_format" type="string">
   返回格式，通常为 `url`
+</ParamField>
+
+<ParamField body="reference_image" type="string">
+  参考图片。直接传资源字符串：公网 URL、data URL 或 `asset://asset_xxx`
+</ParamField>
+
+<ParamField body="reference_images" type="array">
+  多张参考图片。数组元素支持与 `reference_image` 相同的写法
 </ParamField>
 
 ## 响应参数
@@ -62,7 +74,8 @@ headers = {
 payload = {
     "model": "doubao-seedream-5-0-lite-260128",
     "prompt": "电商主图，白底，一瓶护肤品，柔和布光",
-    "size": "1024x1024"
+    "size": "1024x1024",
+    "reference_image": "asset://asset_reference_image"
 }
 
 response = requests.post(url, headers=headers, json=payload)
@@ -75,7 +88,8 @@ const axios = require('axios');
 axios.post('https://api.chenyu.cn/v1/images/generations', {
   model: 'doubao-seedream-5-0-lite-260128',
   prompt: '电商主图，白底，一瓶护肤品，柔和布光',
-  size: '1024x1024'
+  size: '1024x1024',
+  reference_image: 'asset://asset_reference_image'
 }, {
   headers: {
     Authorization: 'Bearer your_api_key',
@@ -93,7 +107,8 @@ curl -X POST "https://api.chenyu.cn/v1/images/generations" \
   -d '{
     "model": "doubao-seedream-5-0-lite-260128",
     "prompt": "电商主图，白底，一瓶护肤品，柔和布光",
-    "size": "1024x1024"
+    "size": "1024x1024",
+    "reference_image": "asset://asset_reference_image"
   }'
 ```
 

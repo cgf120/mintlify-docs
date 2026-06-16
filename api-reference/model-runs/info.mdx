@@ -1,0 +1,87 @@
+---
+title: "查询外部模型任务详情"
+api: "GET https://www.chenyu.cn/api/open/v2/model-runs/info"
+description: "查询单个外部模型任务状态、输出和扣费信息"
+authMethod: "bearer"
+---
+
+# 查询外部模型任务详情
+
+根据 `run_id` 查询外部模型任务详情。查询时系统会尽量同步大模型网关任务状态；任务进入终态后会完成结算或释放预扣。
+
+## 请求参数
+
+<ParamField query="run_id" type="string" required>
+  外部模型应用任务 ID
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="data.run_id" type="string">
+  应用任务 ID
+</ResponseField>
+
+<ResponseField name="data.gateway_task_id" type="string">
+  大模型网关任务 ID
+</ResponseField>
+
+<ResponseField name="data.status" type="string">
+  任务状态：`created`、`queued`、`running`、`completed`、`failed`、`cancelled`
+</ResponseField>
+
+<ResponseField name="data.settlement_status" type="string">
+  结算状态：`pending`、`settled`、`released`
+</ResponseField>
+
+<ResponseField name="data.frozen_amount" type="string">
+  预扣金额
+</ResponseField>
+
+<ResponseField name="data.final_amount" type="string">
+  实际扣费金额
+</ResponseField>
+
+<ResponseField name="data.released_amount" type="string">
+  已释放金额
+</ResponseField>
+
+<ResponseField name="data.output" type="object">
+  模型输出。视频任务完成后通常包含 `url` 或 `video_url`
+</ResponseField>
+
+<ResponseField name="data.error_code" type="string">
+  失败错误码
+</ResponseField>
+
+<ResponseField name="data.error_message" type="string">
+  失败错误信息
+</ResponseField>
+
+## 代码示例
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/model-runs/info?run_id=modelrun_1782000000000000000_ab12cd34" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "run_id": "modelrun_1782000000000000000_ab12cd34",
+    "model": "doubao-seedance-2-0-260128",
+    "gateway_task_id": "vid_1782000000000000000_ef56ab78",
+    "status": "completed",
+    "settlement_status": "settled",
+    "frozen_amount": "0.60000000",
+    "final_amount": "0.60000000",
+    "released_amount": "0.00000000",
+    "output": {
+      "url": "https://example.com/video.mp4"
+    }
+  }
+}
+```

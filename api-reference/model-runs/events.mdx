@@ -1,0 +1,76 @@
+---
+title: "查询外部模型任务记录"
+api: "GET https://www.chenyu.cn/api/open/v2/model-runs/events"
+description: "查询外部模型任务生命周期记录"
+authMethod: "bearer"
+---
+
+# 查询外部模型任务记录
+
+查询任务生命周期记录，用于排查任务是否完成预扣、是否提交到网关、是否结算或释放。
+
+## 请求参数
+
+<ParamField query="run_id" type="string" required>
+  外部模型应用任务 ID
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="data.items" type="array">
+  事件列表，按发生时间正序返回
+</ResponseField>
+
+<ResponseField name="data.items[].event_type" type="string">
+  事件类型：`created`、`reserved`、`gateway_submitted`、`gateway_refreshed`、`settled`、`released`、`cancelled`、`failed`
+</ResponseField>
+
+<ResponseField name="data.items[].run_status" type="string">
+  事件发生时的任务状态
+</ResponseField>
+
+<ResponseField name="data.items[].settlement_status" type="string">
+  事件发生时的结算状态
+</ResponseField>
+
+<ResponseField name="data.items[].amount" type="string">
+  事件相关金额。预扣、结算、释放事件会返回对应金额
+</ResponseField>
+
+<ResponseField name="data.items[].error_message" type="string">
+  失败或取消原因
+</ResponseField>
+
+## 代码示例
+
+```curl cURL
+curl -X GET "https://www.chenyu.cn/api/open/v2/model-runs/events?run_id=modelrun_1782000000000000000_ab12cd34" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "查询成功",
+  "data": {
+    "items": [
+      {
+        "event_type": "created",
+        "run_status": "created",
+        "settlement_status": "pending",
+        "amount": "0.00000000",
+        "created_at": "2026-06-13 10:00:00"
+      },
+      {
+        "event_type": "reserved",
+        "run_status": "created",
+        "settlement_status": "pending",
+        "amount": "0.60000000",
+        "created_at": "2026-06-13 10:00:00"
+      }
+    ]
+  }
+}
+```

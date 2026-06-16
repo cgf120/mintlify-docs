@@ -1,0 +1,251 @@
+---
+title: "上传资源"
+api: "POST https://api.chenyu.cn/v1/assets"
+description: "上传用于大模型网关输入的临时资源"
+authMethod: "bearer"
+---
+
+# 上传资源
+
+上传图片、视频、音频或文件，生成可在大模型网关请求中使用的临时资源地址。适用于视频首帧、尾帧、参考图等输入素材。
+
+<Info>
+  上传成功后使用返回的 `asset_uri` 字段值，例如 `asset://asset_xxx`。提交模型请求时直接把这个字符串放入图片、视频或音频字段，不需要再包一层对象。临时资源默认 48 小时有效。
+</Info>
+
+## 图片资源支持形式
+
+大模型网关对外统一推荐两种写法：普通字段直接传资源字符串；只有需要声明素材角色时，才使用 `{ "uri": "...", "role": "..." }` 对象。
+
+### 公网 URL
+
+图片地址必须能被服务端访问。
+
+```json
+{
+  "image": "https://example.com/input.png"
+}
+```
+
+### Base64 Data URL
+
+使用 `data:image/<format>;base64,<data>`，其中 `<format>` 使用小写格式名，例如 `png`、`jpeg`、`webp`。
+
+```json
+{
+  "image": "data:image/png;base64,iVBORw0KGgo..."
+}
+```
+
+### 资源 ID
+
+先调用本接口上传本地文件，再把返回的 `asset_uri` 字段值放入图片字段。
+
+```json
+{
+  "image": "asset://asset_38d2ff7769fb3b7267039941547e6a78"
+}
+```
+
+### 带角色对象
+
+只有需要声明首帧、尾帧、参考图等素材角色时，才使用对象写法。对象里统一使用 `uri` 存资源字符串。
+
+```json
+{
+  "first_frame": {
+    "uri": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
+    "role": "first_frame"
+  }
+}
+```
+
+## 支持图片资源的字段
+
+以下字段会被网关识别并转为上游模型可访问的地址：
+
+| 接口 | 字段 |
+| --- | --- |
+| `/v1/images/generations` | `image`、`images`、`input_image`、`input_image_url`、`reference_image`、`reference_images`、`mask` |
+| `/v1/images/edits` | `image`、`images`、`input_image`、`input_image_url`、`reference_image`、`reference_images`、`mask` |
+| `/v1/videos` | `first_frame`、`last_frame`、`image`、`image_url`、`images`、`image_urls`、`reference_image`、`reference_images`、`reference_image_url`、`reference_image_urls`、`image_with_roles`、`images_with_roles` |
+| Chat Completions / Responses | `content` 数组里的 `image_url`、`image`、`input_image` |
+
+图片编辑接口同时支持 OpenAI SDK 常见的 `multipart/form-data` 文件上传，文件字段包括 `image`、`image[]` 和 `mask`。
+
+## 请求参数
+
+请求类型为 `multipart/form-data`。
+
+<ParamField body="file" type="file" required>
+  要上传的本地文件，单个文件最大 100MB
+</ParamField>
+
+<ParamField body="media_type" type="string">
+  资源类型。常用值：`image`、`video`、`audio`、`file`。不传时服务端会根据文件类型推断
+</ParamField>
+
+<ParamField body="purpose" type="string">
+  资源用途。当前对外接口仅支持 `temp_input`，不传时默认 `temp_input`
+</ParamField>
+
+<ParamField body="ttl_hours" type="integer">
+  临时资源有效小时数。不传时默认 48 小时
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="id" type="string">
+  资源 ID
+</ResponseField>
+
+<ResponseField name="asset_id" type="string">
+  资源 ID，与 `id` 含义一致
+</ResponseField>
+
+<ResponseField name="asset_uri" type="string">
+  资源引用地址，提交模型请求时优先使用，例如 `asset://asset_xxx`
+</ResponseField>
+
+<ResponseField name="url" type="string">
+  资源访问地址
+</ResponseField>
+
+<ResponseField name="content_url" type="string">
+  资源内容访问地址，与 `url` 含义一致
+</ResponseField>
+
+<ResponseField name="signed_url" type="string">
+  带签名的临时访问地址
+</ResponseField>
+
+<ResponseField name="media_type" type="string">
+  资源类型，例如 `image`
+</ResponseField>
+
+<ResponseField name="mime_type" type="string">
+  MIME 类型，例如 `image/png`
+</ResponseField>
+
+<ResponseField name="size_bytes" type="integer">
+  文件大小，单位字节
+</ResponseField>
+
+<ResponseField name="purpose" type="string">
+  资源用途，当前为 `temp_input`
+</ResponseField>
+
+<ResponseField name="persistent" type="boolean">
+  是否为长期资源。临时输入资源一般为 `false`
+</ResponseField>
+
+<ResponseField name="expires_at" type="string">
+  临时资源过期时间
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  资源状态。可用状态通常为 `confirmed`
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+url = "https://api.chenyu.cn/v1/assets"
+headers = {"Authorization": "Bearer your_api_key"}
+files = {"file": open("first-frame.png", "rb")}
+data = {
+    "media_type": "image",
+    "purpose": "temp_input"
+}
+
+response = requests.post(url, headers=headers, files=files, data=data)
+print(response.json()["asset_uri"])
+```
+
+```javascript JavaScript
+const axios = require('axios');
+const fs = require('fs');
+const FormData = require('form-data');
+
+const form = new FormData();
+form.append('file', fs.createReadStream('first-frame.png'));
+form.append('media_type', 'image');
+form.append('purpose', 'temp_input');
+
+axios.post('https://api.chenyu.cn/v1/assets', form, {
+  headers: {
+    Authorization: 'Bearer your_api_key',
+    ...form.getHeaders()
+  }
+}).then((response) => {
+  console.log(response.data.asset_uri);
+});
+```
+
+```curl cURL
+curl -X POST "https://api.chenyu.cn/v1/assets" \
+  -H "Authorization: Bearer your_api_key" \
+  -F "file=@first-frame.png" \
+  -F "media_type=image" \
+  -F "purpose=temp_input"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "id": "asset_38d2ff7769fb3b7267039941547e6a78",
+  "asset_id": "asset_38d2ff7769fb3b7267039941547e6a78",
+  "asset_uri": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
+  "url": "https://www.chenyu.team/assets/asset_38d2ff7769fb3b7267039941547e6a78/content",
+  "content_url": "https://www.chenyu.team/assets/asset_38d2ff7769fb3b7267039941547e6a78/content",
+  "signed_url": "https://www.chenyu.team/assets/asset_38d2ff7769fb3b7267039941547e6a78/content?expires=1781295600&signature=xxxx",
+  "media_type": "image",
+  "mime_type": "image/png",
+  "size_bytes": 102400,
+  "purpose": "temp_input",
+  "persistent": false,
+  "expires_at": "2026-06-16T12:00:00+08:00",
+  "status": "confirmed",
+  "original_filename": "first-frame.png"
+}
+```
+
+## 在模型请求中使用
+
+媒体字段支持三种写法：
+
+```json
+{
+  "first_frame": "https://example.com/first-frame.png"
+}
+```
+
+```json
+{
+  "first_frame": "data:image/png;base64,iVBORw0KGgo..."
+}
+```
+
+```json
+{
+  "first_frame": "asset://asset_38d2ff7769fb3b7267039941547e6a78"
+}
+```
+
+需要声明素材角色时，可以使用对象写法：
+
+```json
+{
+  "first_frame": {
+    "uri": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
+    "role": "first_frame"
+  }
+}
+```

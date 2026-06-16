@@ -1,0 +1,53 @@
+---
+title: "取消外部模型任务"
+api: "POST https://www.chenyu.cn/api/open/v2/model-runs/cancel"
+description: "取消未完成的外部模型任务并释放预扣"
+authMethod: "bearer"
+---
+
+# 取消外部模型任务
+
+取消仍处于 `created`、`queued` 或 `running` 的外部模型任务。系统会尽量请求底层大模型网关取消上游任务，取消成功后释放预扣金额。
+
+<Warning>
+  如果任务在取消请求到达前已经完成，接口会返回完成后的任务状态，并按正常成功结果结算，不会释放已产生的实际费用。
+</Warning>
+
+## 请求参数
+
+<ParamField body="run_id" type="string" required>
+  外部模型应用任务 ID
+</ParamField>
+
+## 响应参数
+
+响应字段同 [查询外部模型任务详情](/api-reference/model-runs/info)。
+
+## 代码示例
+
+```curl cURL
+curl -X POST "https://www.chenyu.cn/api/open/v2/model-runs/cancel" \
+  -H "Authorization: Bearer your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "run_id": "modelrun_1782000000000000000_ab12cd34"
+  }'
+```
+
+## 响应示例
+
+```json
+{
+  "code": 0,
+  "msg": "取消成功",
+  "data": {
+    "run_id": "modelrun_1782000000000000000_ab12cd34",
+    "status": "cancelled",
+    "settlement_status": "released",
+    "frozen_amount": "0.60000000",
+    "released_amount": "0.60000000",
+    "error_code": "user_cancelled",
+    "error_message": "用户取消任务"
+  }
+}
+```

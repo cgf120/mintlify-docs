@@ -13,6 +13,10 @@ authMethod: "bearer"
   `idempotency_key` 必填。同一用户、相同工作流、相同幂等键的重复请求会返回同一笔运行记录，避免网络重试造成重复提交。
 </Warning>
 
+<Info>
+  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。本地文件建议先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，再把返回的 `asset_uri` 字段值放入 `inputs`。
+</Info>
+
 ## 请求参数
 
 <ParamField body="workflow_id" type="string" required>
@@ -28,8 +32,7 @@ authMethod: "bearer"
 </ParamField>
 
 <ParamField body="inputs.contains_real_person_material" type="boolean">
-  Seedance 视频生成工作流专用。上传的图片或视频素材包含真人并需要进行火山素材备案时传 `true`；
-  未传或为 `false` 时，图片、视频、音频按普通工作流 S3 公网 URL 方式提交。音频不会进入真人素材备案。
+  历史 Seedance 视频工作流兼容参数。新接入外部视频模型时，建议使用 [外部模型任务接口](/api-reference/model-runs/video-submit)。
 </ParamField>
 
 <ParamField body="idempotency_key" type="string" required>
@@ -154,13 +157,7 @@ payload = {
         "generation_category": "reference_to_video",
         "model": "doubao-seedance-2-0-fast-260128",
         "prompt": "cinematic portrait video",
-        "images": [
-            {
-                "source_type": "url",
-                "url": "https://www.chenyu.cn/media/example-image",
-                "role": "reference_image"
-            }
-        ],
+        "images": ["asset://asset_reference_image"],
         "contains_real_person_material": true,
         "resolution": "720p",
         "duration": "5"
@@ -184,11 +181,7 @@ axios.post('https://www.chenyu.cn/api/open/v2/workflow/run/submit', {
     generation_category: 'reference_to_video',
     model: 'doubao-seedance-2-0-fast-260128',
     prompt: 'cinematic portrait video',
-    images: [{
-      source_type: 'url',
-      url: 'https://www.chenyu.cn/media/example-image',
-      role: 'reference_image'
-    }],
+    images: ['asset://asset_reference_image'],
     contains_real_person_material: true,
     resolution: '720p',
     duration: '5'
@@ -216,13 +209,7 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
       "generation_category": "reference_to_video",
       "model": "doubao-seedance-2-0-fast-260128",
       "prompt": "cinematic portrait video",
-      "images": [
-        {
-          "source_type": "url",
-          "url": "https://www.chenyu.cn/media/example-image",
-          "role": "reference_image"
-        }
-      ],
+      "images": ["asset://asset_reference_image"],
       "contains_real_person_material": true,
       "resolution": "720p",
       "duration": "5"

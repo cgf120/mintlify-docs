@@ -9,26 +9,94 @@ authMethod: "bearer"
 
 创建视频生成任务。视频生成是异步任务，接口会先返回任务 ID，后续通过查询接口获取状态和结果。
 
+<Info>
+  直接调用 `https://api.chenyu.cn/v1/videos` 时，大模型网关会负责 API Key 认证、预扣费和终态结算。通过晨羽智云应用接口使用外部模型时，请使用 [外部模型任务接口](/api-reference/model-runs/video-submit)。
+</Info>
+
+<Info>
+  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。需要声明素材角色时，使用 `{ "uri": "...", "role": "first_frame" }`。本地文件建议先调用 [上传资源](/llm-gateway/api/assets-upload)，再把返回的 `asset_uri` 字段值放入请求参数。
+</Info>
+
+## 请求格式
+
+推荐使用 `application/json`。接口也兼容 `multipart/form-data`，表单字段会被解析为 JSON 字段；文件字段 `image`、`image[]`、`mask`、`video`、`video[]`、`input_video` 会被转为 data URL 后继续处理。
+
 ## 请求参数
 
 <ParamField body="model" type="string" required>
   视频生成模型 ID
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  视频生成提示词
+<ParamField body="prompt" type="string">
+  视频生成提示词。不传 `content` 时可直接使用该字段；传入后网关会转换为 `content` 中的文本项
 </ParamField>
 
-<ParamField body="image" type="string">
-  可选参考图片 URL。具体支持范围以模型为准
+<ParamField body="content" type="array">
+  官方内容数组。可直接传文本、图片、视频或音频内容。传了 `content` 时会保留原结构
 </ParamField>
 
-<ParamField body="duration" type="string">
-  视频时长，例如 `5`
+<ParamField body="generation_category" type="string">
+  生成方式。常用值：`text_to_video`、`first_frame_to_video`、`first_last_frame`、`reference_to_video`
+</ParamField>
+
+<ParamField body="first_frame" type="string | object">
+  首帧图片。图生视频或首尾帧视频必填。支持公网 URL、data URL、`asset://asset_xxx` 或 `{ "uri": "...", "role": "first_frame" }`
+</ParamField>
+
+<ParamField body="last_frame" type="string | object">
+  尾帧图片。首尾帧视频必填。支持公网 URL、data URL、`asset://asset_xxx` 或 `{ "uri": "...", "role": "last_frame" }`
+</ParamField>
+
+<ParamField body="images" type="array">
+  参考图片列表。数组元素支持公网 URL、data URL、`asset://asset_xxx`，也支持带 `uri` 和 `role` 的对象
+</ParamField>
+
+<ParamField body="reference_images" type="array">
+  参考图片列表，等价于 `images`
+</ParamField>
+
+<ParamField body="videos" type="array">
+  参考视频列表。多模态参考生视频使用，具体支持范围以模型为准
+</ParamField>
+
+<ParamField body="audios" type="array">
+  参考音频列表。多模态参考生视频使用，具体支持范围以模型为准
+</ParamField>
+
+<ParamField body="duration" type="integer | string">
+  视频时长，单位秒。例如 `5`。Seedance 当前支持 4 到 15 秒
+</ParamField>
+
+<ParamField body="seconds" type="integer | string">
+  `duration` 的兼容别名。也兼容 `duration_sec`、`duration_seconds`
 </ParamField>
 
 <ParamField body="resolution" type="string">
-  输出分辨率，例如 `720p`、`1080p`
+  输出分辨率，例如 `480p`、`720p`、`1080p`。Seedance 2.0 支持 `480p`、`720p`、`1080p`；Seedance Fast 支持 `480p`、`720p`
+</ParamField>
+
+<ParamField body="ratio" type="string">
+  画面比例，例如 `16:9`、`9:16`、`1:1`
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+  `ratio` 的兼容别名。`multipart/form-data` 或 SDK 中传 `size=1280x720` 时，网关会自动推断为 `16:9`
+</ParamField>
+
+<ParamField body="generate_audio" type="boolean">
+  是否生成音频。具体是否支持以模型为准
+</ParamField>
+
+<ParamField body="watermark" type="boolean">
+  是否添加水印。具体是否支持以模型为准
+</ParamField>
+
+<ParamField body="contains_real_person_material" type="boolean">
+  输入图片或视频素材包含真人并需要素材备案时传 `true`
+</ParamField>
+
+<ParamField body="extra_body" type="object">
+  透传给上游渠道的扩展参数。网关会把其中字段展开到请求顶层
 </ParamField>
 
 ## 响应参数
@@ -46,11 +114,19 @@ authMethod: "bearer"
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  任务状态，如 `queued`、`running`、`succeeded`、`failed`
+  任务状态，如 `queued`、`running`、`completed`、`failed`、`cancelled`
 </ResponseField>
 
 <ResponseField name="created_at" type="integer">
   创建时间戳
+</ResponseField>
+
+<ResponseField name="url" type="string">
+  如果上游同步返回视频地址，或查询任务完成后返回视频地址，则包含该字段
+</ResponseField>
+
+<ResponseField name="upstream_response" type="object">
+  上游原始响应摘要，便于排查任务状态
 </ResponseField>
 
 ## 代码示例
@@ -67,7 +143,11 @@ headers = {
 }
 payload = {
     "model": "doubao-seedance-2-0-fast-260128",
-    "prompt": "一只白色机器人在未来城市街道上行走，电影感镜头"
+    "generation_category": "text_to_video",
+    "prompt": "一只白色机器人在未来城市街道上行走，电影感镜头",
+    "duration": 5,
+    "resolution": "720p",
+    "ratio": "16:9"
 }
 
 response = requests.post(url, headers=headers, json=payload)
@@ -79,7 +159,11 @@ const axios = require('axios');
 
 axios.post('https://api.chenyu.cn/v1/videos', {
   model: 'doubao-seedance-2-0-fast-260128',
-  prompt: '一只白色机器人在未来城市街道上行走，电影感镜头'
+  generation_category: 'text_to_video',
+  prompt: '一只白色机器人在未来城市街道上行走，电影感镜头',
+  duration: 5,
+  resolution: '720p',
+  ratio: '16:9'
 }, {
   headers: {
     Authorization: 'Bearer your_api_key',
@@ -96,7 +180,11 @@ curl -X POST "https://api.chenyu.cn/v1/videos" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "doubao-seedance-2-0-fast-260128",
-    "prompt": "一只白色机器人在未来城市街道上行走，电影感镜头"
+    "generation_category": "text_to_video",
+    "prompt": "一只白色机器人在未来城市街道上行走，电影感镜头",
+    "duration": 5,
+    "resolution": "720p",
+    "ratio": "16:9"
   }'
 ```
 
@@ -111,5 +199,69 @@ curl -X POST "https://api.chenyu.cn/v1/videos" \
   "model": "doubao-seedance-2-0-fast-260128",
   "status": "queued",
   "created_at": 1780000000
+}
+```
+
+## 图生视频示例
+
+```json
+{
+  "model": "doubao-seedance-2-0-260128",
+  "generation_category": "first_frame_to_video",
+  "prompt": "闪白转场，女主在茶园悠闲采茶",
+  "first_frame": "asset://asset_first_frame",
+  "duration": 5,
+  "resolution": "720p",
+  "ratio": "16:9",
+  "contains_real_person_material": true
+}
+```
+
+## 官方 content 格式示例
+
+下面是 OpenAI 兼容的官方 `content` 协议格式，所以图片地址位于 `image_url.url`。普通媒体字段仍按上文规则直接传资源字符串；只有需要标记素材角色时才使用 `{ "uri": "...", "role": "..." }`。
+
+```json
+{
+  "model": "doubao-seedance-2-0-260128",
+  "content": [
+    {
+      "type": "text",
+      "text": "闪白转场，女主在茶园悠闲采茶"
+    },
+    {
+      "type": "image_url",
+      "image_url": {
+        "url": "asset://asset_first_frame"
+      },
+      "role": "first_frame"
+    }
+  ],
+  "duration": 5,
+  "resolution": "720p",
+  "ratio": "16:9",
+  "contains_real_person_material": true
+}
+```
+
+## 多模态参考示例
+
+```json
+{
+  "model": "doubao-seedance-2-0-fast-260128",
+  "generation_category": "reference_to_video",
+  "prompt": "根据参考素材生成电影感产品视频",
+  "images": [
+    "asset://asset_reference_image_1",
+    {
+      "uri": "https://example.com/reference-2.png",
+      "role": "reference_image"
+    }
+  ],
+  "videos": ["asset://asset_reference_video_1"],
+  "audios": ["asset://asset_reference_audio_1"],
+  "duration": 5,
+  "resolution": "720p",
+  "ratio": "16:9"
 }
 ```

@@ -1,0 +1,76 @@
+---
+title: "取消视频任务"
+api: "DELETE https://api.chenyu.cn/v1/videos/{task_id}"
+description: "取消未完成的视频生成任务"
+authMethod: "bearer"
+---
+
+# 取消视频任务
+
+取消仍处于排队或运行中的视频生成任务。取消成功后，任务状态会变为 `cancelled`；如果任务已经完成，会返回当前终态结果。
+
+<Warning>
+  不是所有模型渠道都支持取消。渠道不支持取消时会返回 `video_cancel_not_supported`。
+</Warning>
+
+## 请求参数
+
+<ParamField path="task_id" type="string" required>
+  视频任务 ID，由 [创建视频任务](/llm-gateway/api/video-create) 返回
+</ParamField>
+
+## 响应参数
+
+<ResponseField name="id" type="string">
+  视频任务 ID
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  固定为 `video`
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  取消成功时为 `cancelled`
+</ResponseField>
+
+<ResponseField name="error_code" type="string">
+  取消原因错误码，通常为 `user_cancelled`
+</ResponseField>
+
+<ResponseField name="error_message" type="string">
+  取消原因说明
+</ResponseField>
+
+## 代码示例
+
+<CodeGroup>
+
+```python Python
+import requests
+
+task_id = "vid_1782000000000000000_ef56ab78"
+url = f"https://api.chenyu.cn/v1/videos/{task_id}"
+headers = {"Authorization": "Bearer your_api_key"}
+
+response = requests.delete(url, headers=headers)
+print(response.json())
+```
+
+```curl cURL
+curl -X DELETE "https://api.chenyu.cn/v1/videos/vid_1782000000000000000_ef56ab78" \
+  -H "Authorization: Bearer your_api_key"
+```
+
+</CodeGroup>
+
+## 响应示例
+
+```json
+{
+  "id": "vid_1782000000000000000_ef56ab78",
+  "object": "video",
+  "status": "cancelled",
+  "error_code": "user_cancelled",
+  "error_message": "用户取消任务"
+}
+```

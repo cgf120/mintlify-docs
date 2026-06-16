@@ -9,6 +9,10 @@
     {
       "name": "工作流管理",
       "description": "工作流市场、运行提交和执行查询接口"
+    },
+    {
+      "name": "外部模型任务",
+      "description": "外部模型任务提交、查询、取消和事件记录接口"
     }
   ],
   "paths": {
@@ -2131,7 +2135,7 @@
                   "inputs": {
                     "type": "object",
                     "additionalProperties": true,
-                    "description": "工作流输入参数。Seedance 真人素材备案可在 inputs 中传 contains_real_person_material=true，表示图片和视频素材需先进行火山素材备案；音频不参与备案。"
+                    "description": "工作流输入参数。历史 Seedance 视频工作流可在 inputs 中传 contains_real_person_material=true；新接入外部视频模型时，建议使用 /api/open/v2/model-runs/videos。"
                   },
                   "idempotency_key": {
                     "type": "string",
@@ -2755,6 +2759,689 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/api/open/v2/model-runs/videos": {
+      "post": {
+        "summary": "提交外部视频模型任务",
+        "deprecated": false,
+        "description": "通过晨羽智云应用接口提交外部视频模型任务。平台会先预扣费，再提交到大模型网关执行。",
+        "tags": [
+          "外部模型任务"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "idempotency_key",
+                  "inputs"
+                ],
+                "properties": {
+                  "idempotency_key": {
+                    "type": "string",
+                    "description": "调用方生成的幂等键"
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "description": "调用方请求ID"
+                  },
+                  "inputs": {
+                    "type": "object",
+                    "required": [
+                      "model",
+                      "prompt"
+                    ],
+                    "additionalProperties": true,
+                    "description": "外部模型输入参数，例如 model、prompt、generation_category、first_frame、last_frame、duration、resolution、ratio",
+                    "properties": {
+                      "model": {
+                        "type": "string",
+                        "description": "视频模型ID"
+                      },
+                      "prompt": {
+                        "type": "string",
+                        "description": "视频生成提示词"
+                      },
+                      "generation_category": {
+                        "type": "string",
+                        "description": "生成方式：text_to_video、first_frame_to_video、first_last_frame_to_video"
+                      },
+                      "first_frame": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "description": "首帧图片"
+                      },
+                      "last_frame": {
+                        "type": "object",
+                        "additionalProperties": true,
+                        "description": "尾帧图片"
+                      },
+                      "duration": {
+                        "type": "integer",
+                        "description": "视频时长，单位秒"
+                      },
+                      "resolution": {
+                        "type": "string",
+                        "description": "输出分辨率"
+                      },
+                      "ratio": {
+                        "type": "string",
+                        "description": "画面比例"
+                      },
+                      "contains_real_person_material": {
+                        "type": "boolean",
+                        "description": "是否包含需要素材备案的真人素材"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "run_id": {
+                          "type": "string",
+                          "description": "外部模型应用任务ID"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "description": "请求ID"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "任务类型"
+                        },
+                        "model": {
+                          "type": "string",
+                          "description": "模型ID"
+                        },
+                        "provider": {
+                          "type": "string",
+                          "description": "供应商标识"
+                        },
+                        "provider_model": {
+                          "type": "string",
+                          "description": "供应商模型ID"
+                        },
+                        "gateway_task_id": {
+                          "type": "string",
+                          "description": "大模型网关任务ID"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "任务状态"
+                        },
+                        "settlement_status": {
+                          "type": "string",
+                          "description": "结算状态"
+                        },
+                        "quote_amount": {
+                          "type": "string",
+                          "description": "报价金额"
+                        },
+                        "frozen_amount": {
+                          "type": "string",
+                          "description": "预扣金额"
+                        },
+                        "final_amount": {
+                          "type": "string",
+                          "description": "实际扣费金额"
+                        },
+                        "released_amount": {
+                          "type": "string",
+                          "description": "释放金额"
+                        },
+                        "error_code": {
+                          "type": "string",
+                          "description": "错误码"
+                        },
+                        "error_message": {
+                          "type": "string",
+                          "description": "错误信息"
+                        },
+                        "output": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "模型输出"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "创建时间"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "更新时间"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open/v2/model-runs/list": {
+      "get": {
+        "summary": "查询外部模型任务列表",
+        "deprecated": false,
+        "description": "查询当前 API Key 提交的外部模型任务列表。",
+        "tags": [
+          "外部模型任务"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "任务状态",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "页码，默认1",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "description": "每页数量，默认20，最大100",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "description": "总数量"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "run_id": {
+                                "type": "string",
+                                "description": "外部模型应用任务ID"
+                              },
+                              "request_id": {
+                                "type": "string",
+                                "description": "请求ID"
+                              },
+                              "endpoint": {
+                                "type": "string",
+                                "description": "任务类型"
+                              },
+                              "model": {
+                                "type": "string",
+                                "description": "模型ID"
+                              },
+                              "provider": {
+                                "type": "string",
+                                "description": "供应商标识"
+                              },
+                              "provider_model": {
+                                "type": "string",
+                                "description": "供应商模型ID"
+                              },
+                              "gateway_task_id": {
+                                "type": "string",
+                                "description": "大模型网关任务ID"
+                              },
+                              "status": {
+                                "type": "string",
+                                "description": "任务状态"
+                              },
+                              "settlement_status": {
+                                "type": "string",
+                                "description": "结算状态"
+                              },
+                              "quote_amount": {
+                                "type": "string",
+                                "description": "报价金额"
+                              },
+                              "frozen_amount": {
+                                "type": "string",
+                                "description": "预扣金额"
+                              },
+                              "final_amount": {
+                                "type": "string",
+                                "description": "实际扣费金额"
+                              },
+                              "released_amount": {
+                                "type": "string",
+                                "description": "释放金额"
+                              },
+                              "error_code": {
+                                "type": "string",
+                                "description": "错误码"
+                              },
+                              "error_message": {
+                                "type": "string",
+                                "description": "错误信息"
+                              },
+                              "output": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "description": "模型输出"
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "description": "创建时间"
+                              },
+                              "updated_at": {
+                                "type": "string",
+                                "description": "更新时间"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open/v2/model-runs/info": {
+      "get": {
+        "summary": "查询外部模型任务详情",
+        "deprecated": false,
+        "description": "查询单个外部模型任务状态、输出和扣费信息。",
+        "tags": [
+          "外部模型任务"
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "query",
+            "description": "外部模型应用任务ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "run_id": {
+                          "type": "string",
+                          "description": "外部模型应用任务ID"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "description": "请求ID"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "任务类型"
+                        },
+                        "model": {
+                          "type": "string",
+                          "description": "模型ID"
+                        },
+                        "provider": {
+                          "type": "string",
+                          "description": "供应商标识"
+                        },
+                        "provider_model": {
+                          "type": "string",
+                          "description": "供应商模型ID"
+                        },
+                        "gateway_task_id": {
+                          "type": "string",
+                          "description": "大模型网关任务ID"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "任务状态"
+                        },
+                        "settlement_status": {
+                          "type": "string",
+                          "description": "结算状态"
+                        },
+                        "quote_amount": {
+                          "type": "string",
+                          "description": "报价金额"
+                        },
+                        "frozen_amount": {
+                          "type": "string",
+                          "description": "预扣金额"
+                        },
+                        "final_amount": {
+                          "type": "string",
+                          "description": "实际扣费金额"
+                        },
+                        "released_amount": {
+                          "type": "string",
+                          "description": "释放金额"
+                        },
+                        "error_code": {
+                          "type": "string",
+                          "description": "错误码"
+                        },
+                        "error_message": {
+                          "type": "string",
+                          "description": "错误信息"
+                        },
+                        "output": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "模型输出"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "创建时间"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "更新时间"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open/v2/model-runs/events": {
+      "get": {
+        "summary": "查询外部模型任务记录",
+        "deprecated": false,
+        "description": "查询外部模型任务生命周期记录。",
+        "tags": [
+          "外部模型任务"
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "query",
+            "description": "外部模型应用任务ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "event_type": {
+                                "type": "string",
+                                "description": "事件类型"
+                              },
+                              "run_status": {
+                                "type": "string",
+                                "description": "事件发生时任务状态"
+                              },
+                              "settlement_status": {
+                                "type": "string",
+                                "description": "事件发生时结算状态"
+                              },
+                              "gateway_task_id": {
+                                "type": "string",
+                                "description": "大模型网关任务ID"
+                              },
+                              "freeze_order_no": {
+                                "type": "string",
+                                "description": "预扣订单号"
+                              },
+                              "amount": {
+                                "type": "string",
+                                "description": "事件相关金额"
+                              },
+                              "error_code": {
+                                "type": "string",
+                                "description": "错误码"
+                              },
+                              "error_message": {
+                                "type": "string",
+                                "description": "错误信息"
+                              },
+                              "payload": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "description": "事件扩展信息"
+                              },
+                              "created_at": {
+                                "type": "string",
+                                "description": "事件时间"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/open/v2/model-runs/cancel": {
+      "post": {
+        "summary": "取消外部模型任务",
+        "deprecated": false,
+        "description": "取消未完成的外部模型任务并释放预扣。",
+        "tags": [
+          "外部模型任务"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "run_id"
+                ],
+                "properties": {
+                  "run_id": {
+                    "type": "string",
+                    "description": "外部模型应用任务ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "run_id": {
+                          "type": "string",
+                          "description": "外部模型应用任务ID"
+                        },
+                        "request_id": {
+                          "type": "string",
+                          "description": "请求ID"
+                        },
+                        "endpoint": {
+                          "type": "string",
+                          "description": "任务类型"
+                        },
+                        "model": {
+                          "type": "string",
+                          "description": "模型ID"
+                        },
+                        "provider": {
+                          "type": "string",
+                          "description": "供应商标识"
+                        },
+                        "provider_model": {
+                          "type": "string",
+                          "description": "供应商模型ID"
+                        },
+                        "gateway_task_id": {
+                          "type": "string",
+                          "description": "大模型网关任务ID"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "任务状态"
+                        },
+                        "settlement_status": {
+                          "type": "string",
+                          "description": "结算状态"
+                        },
+                        "quote_amount": {
+                          "type": "string",
+                          "description": "报价金额"
+                        },
+                        "frozen_amount": {
+                          "type": "string",
+                          "description": "预扣金额"
+                        },
+                        "final_amount": {
+                          "type": "string",
+                          "description": "实际扣费金额"
+                        },
+                        "released_amount": {
+                          "type": "string",
+                          "description": "释放金额"
+                        },
+                        "error_code": {
+                          "type": "string",
+                          "description": "错误码"
+                        },
+                        "error_message": {
+                          "type": "string",
+                          "description": "错误信息"
+                        },
+                        "output": {
+                          "type": "object",
+                          "additionalProperties": true,
+                          "description": "模型输出"
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "description": "创建时间"
+                        },
+                        "updated_at": {
+                          "type": "string",
+                          "description": "更新时间"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },

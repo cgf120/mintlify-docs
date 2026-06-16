@@ -7,7 +7,11 @@ authMethod: "bearer"
 
 # 图片编辑
 
-使用 OpenAI Images Edit 兼容格式编辑图片。请求使用 `multipart/form-data`。
+使用 OpenAI Images Edit 兼容格式编辑图片。请求支持 `multipart/form-data` 文件上传，也支持 JSON 中传图片资源地址。
+
+<Info>
+  JSON 请求里的图片字段统一传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。本地文件可直接使用 `multipart/form-data` 上传，也可以先调用 [上传资源](/llm-gateway/api/assets-upload) 获取 `asset_uri` 后再提交 JSON。
+</Info>
 
 ## 请求参数
 
@@ -15,8 +19,16 @@ authMethod: "bearer"
   图片编辑模型 ID
 </ParamField>
 
-<ParamField body="image" type="file" required>
-  待编辑图片文件
+<ParamField body="image" type="file | string" required>
+  待编辑图片。`multipart/form-data` 请求中使用文件；JSON 请求中直接传资源字符串：公网 URL、data URL 或 `asset://asset_xxx`
+</ParamField>
+
+<ParamField body="images" type="array">
+  多张待编辑图片。数组元素支持与 `image` 相同的 JSON 写法
+</ParamField>
+
+<ParamField body="mask" type="file | string">
+  蒙版图片。支持文件、公网 URL、data URL 和 `asset://asset_xxx`
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -100,6 +112,17 @@ curl -X POST "https://api.chenyu.cn/v1/images/edits" \
 ```
 
 </CodeGroup>
+
+## JSON 图片资源示例
+
+```json
+{
+  "model": "doubao-seedream-5-0-lite-260128",
+  "prompt": "把背景改成浅蓝色，保持主体不变",
+  "size": "1024x1024",
+  "image": "asset://asset_input_image"
+}
+```
 
 ## 响应示例
 
