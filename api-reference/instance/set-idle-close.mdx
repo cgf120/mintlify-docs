@@ -19,6 +19,19 @@ authMethod: "bearer"
   实例uuid
 </ParamField>
 
+<ParamField body="destroy" type="bool">
+  触发空闲关机后，是否自动销毁实例
+</ParamField>
+
+<ParamField body="idle_gpu_threshold" type="int">
+  gpu利用率空闲阈值, 取值范围0-100, 0表示使用系统默认配置，当前默认配置30，100表示不判断该指标
+</ParamField>
+
+<ParamField body="idle_fb_threshold" type="int">
+  显存使用率空闲阈值, 取值范围0-100, 0表示使用系统默认配置，当前默认配置100，100表示不判断该指标
+</ParamField>
+
+
 ## 响应参数
 
 <ResponseField name="code" type="integer">
@@ -45,6 +58,8 @@ headers = {
 # 设置空闲60分钟后自动关机
 data = {
     "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "idle_gpu_threshold" : 30,
+    "idle_fb_threshold" : 60,
     "idle_period_minutes": 60
 }
 
@@ -93,6 +108,8 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/instance/set_idle_close" \
   -H "Content-Type: application/json" \
   -d '{
     "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "idle_gpu_threshold" : 30,
+    "idle_fb_threshold" : 60,
     "idle_period_minutes": 60
   }'
 ```
@@ -123,5 +140,5 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/instance/set_idle_close" \
 
 - 空闲关机时间以分钟为单位，只能设置10分钟，30分钟，60分钟，120分钟
 - 设置 `idle_period_minutes` 为 0 可以取消已设置的空闲关机
-- 空闲的标准为：GPU使用率小于10%，且显存使用率小于10%
+- 空闲的标准为：GPU使用率和显存使用率均小于阈值
 
