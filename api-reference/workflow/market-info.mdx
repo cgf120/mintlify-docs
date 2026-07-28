@@ -82,14 +82,156 @@ authMethod: "bearer"
     </ResponseField>
 
     <ResponseField name="editable_parameter_manifest" type="array">
-      可编辑输入参数清单。调用运行接口时，`inputs` 的 key 应使用清单中的 `key`
+      可编辑输入参数清单。提交运行时，`inputs` 的属性名必须使用条目中的 `name`
+
+      <Expandable title="editable_parameter_manifest[]">
+        <ResponseField name="name" type="string">
+          参数唯一名称，也是提交运行时 `inputs` 使用的 key
+        </ResponseField>
+
+        <ResponseField name="display_name" type="string">
+          面向用户展示的参数名称
+        </ResponseField>
+
+        <ResponseField name="description" type="string">
+          工作流作者填写的参数说明和取值提示
+        </ResponseField>
+
+        <ResponseField name="value_type" type="string">
+          参数值类型。常见值为 `string`、`int`、`float`、`bool`、`image_input`、`video_input`、`audio_input`、`file_input`，并兼容 `image`、`video`、`audio`、`file`
+        </ResponseField>
+
+        <ResponseField name="required" type="boolean">
+          是否必须在 `inputs` 中提供
+        </ResponseField>
+
+        <ResponseField name="default_value" type="any">
+          工作流发布时记录的默认值，类型与 `value_type` 对应
+        </ResponseField>
+
+        <ResponseField name="ui_schema" type="object">
+          可选的输入控件定义。`control=select` 时必须从 `options` 中选择；未返回或 `control=input` 时按 `value_type` 直接填写
+        </ResponseField>
+
+        <ResponseField name="bindings" type="array">
+          参数与 ComfyUI 节点字段的内部绑定关系。仅用于解释工作流结构，调用方不需要把该字段放入 `inputs`
+        </ResponseField>
+
+        <ResponseField name="sort_order" type="integer">
+          参数展示顺序，数值越小越靠前
+        </ResponseField>
+      </Expandable>
     </ResponseField>
 
     <ResponseField name="candidate_output_manifest" type="array">
-      输出参数清单，用于识别运行结果中的输出类型
+      输出参数清单，用于把运行结果映射为图片、视频或音频输出
+
+      <Expandable title="candidate_output_manifest[]">
+        <ResponseField name="name" type="string">
+          输出唯一名称，可用于匹配运行结果和输出资源的 `output_key`
+        </ResponseField>
+
+        <ResponseField name="type" type="string">
+          输出类型，当前支持 `image`、`video`、`audio`
+        </ResponseField>
+
+        <ResponseField name="description" type="string">
+          工作流作者填写的输出说明
+        </ResponseField>
+
+        <ResponseField name="node_id" type="string">
+          产生该结果的 ComfyUI 节点 ID
+        </ResponseField>
+
+        <ResponseField name="output_key" type="string">
+          该节点在 ComfyUI 运行历史中的输出字段名，例如 `images`、`gifs` 或 `audio`
+        </ResponseField>
+
+        <ResponseField name="file_index" type="integer">
+          当同一输出字段包含多个文件时选择的文件下标，从 `0` 开始
+        </ResponseField>
+
+        <ResponseField name="history_count" type="integer">
+          发布工作流时最近一次成功运行中检测到的文件数量，仅供参考
+        </ResponseField>
+
+        <ResponseField name="sort_order" type="integer">
+          输出展示顺序，数值越小越靠前
+        </ResponseField>
+      </Expandable>
     </ResponseField>
   </Expandable>
 </ResponseField>
+
+## `editable_parameter_manifest` 输入参数清单
+
+组装运行请求时，先遍历 `editable_parameter_manifest`，再以每个条目的 `name` 为 key 写入 `inputs`。不要使用 `display_name`、`bindings[].field` 或文档旧版本中的 `key` 字段；执行引擎会拒绝 manifest 中未声明的输入参数。
+
+### 基础类型填写方式
+
+| `value_type` | `inputs` 中的 JSON 类型 | 示例 |
+| --- | --- | --- |
+| `string` | 字符串 | `"n6_text": "一只橘猫"` |
+| `int` | 整数，不要加引号 | `"n3_seed": 156680208700286` |
+| `float` | 数字，不要加引号 | `"n4_cfg": 7.5` |
+| `bool` | 布尔值，不要写成字符串 | `"n5_enabled": true` |
+| 图片输入 | 资源字符串，见下文 | `"n10_image": "asset://asset_xxx"` |
+| 视频输入 | 资源字符串，见下文 | `"n11_video": "asset://asset_xxx"` |
+| 音频输入 | 资源字符串，见下文 | `"n12_audio": "asset://asset_xxx"` |
+| 通用文件输入 | 资源字符串，见下文 | `"n13_file": "asset://asset_xxx"` |
+
+<Info>
+  图片、视频、音频和通用文件参数分别由 `image_input`/`image`、`video_input`/`video`、`audio_input`/`audio`、`file_input`/`file` 标识。服务端还兼容部分历史别名；调用方应以当前详情响应实际返回的 `value_type` 为准。
+</Info>
+
+### 必填项和默认值
+
+- `required=true`：必须在 `inputs` 中提供该 `name`，否则运行会失败
+- `required=false`：可以省略，工作流会保留发布版本中保存的节点值
+- `default_value`：用于展示或预填。为了让调用结果可预测，必填参数以及需要固定值的可选参数都应显式传入，不要仅依赖该字段
+
+### 下拉选择
+
+当条目返回 `ui_schema.control="select"` 时，可选列表就在 `ui_schema.options` 中：
+
+```json
+{
+  "name": "n4_sampler_name",
+  "value_type": "string",
+  "ui_schema": {
+    "control": "select",
+    "options_source": "comfy_node_def",
+    "options": [
+      { "label": "euler", "value": "euler" },
+      { "label": "dpmpp_2m", "value": "dpmpp_2m" }
+    ]
+  }
+}
+```
+
+提交时传选中项的 `value`，不是 `label`。`value` 可能是字符串、数字或布尔值，必须保留其原始 JSON 类型。选项由工作流对应的 ComfyUI 节点定义动态生成，不存在平台统一的固定列表。
+
+### 数字范围
+
+当前 `editable_parameter_manifest` **不返回** `minimum`、`maximum` 或 `step` 字段，开放接口也无法从清单中推导数值边界。请按 `description`、`default_value` 和具体工作流约定填写；超出底层 ComfyUI 节点支持范围的值可能在执行阶段失败。文档不会把某个工作流的数值范围套用到其他工作流。
+
+### 文件和资源 ID
+
+本地图片、视频、音频或其他文件不能直接放入 JSON。请先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，然后把响应中的 `asset_uri` 作为对应参数值：
+
+```json
+{
+  "inputs": {
+    "n10_image": "asset://asset_38d2ff7769fb3b7267039941547e6a78"
+  }
+}
+```
+
+如果手中只有 `asset_id`，请拼成 `asset://<asset_id>`；不要只传裸值 `asset_xxx`。文件参数也支持服务端可访问的 `http://`、`https://` 地址以及 `data:<mime>;base64,...`，但本地文件和较大文件建议统一先上传。资源必须属于当前调用者且媒体类型要与参数类型匹配。
+
+## `candidate_output_manifest` 输出参数清单
+
+该清单只描述运行结果，不需要放入提交接口的 `inputs`。`type` 决定结果按图片、视频还是音频展示；`node_id + output_key + file_index` 精确定位 ComfyUI 输出。查询运行详情或执行结果时，应优先使用清单中的 `name` 和 `type` 识别输出，不要根据文件扩展名猜测类型。
 
 ## 代码示例
 
@@ -144,31 +286,88 @@ curl -X GET "https://www.chenyu.cn/api/open/v2/workflow/market/info?workflow_id=
     "external_cost_notice": "",
     "editable_parameter_manifest": [
       {
-        "key": "n6_text",
+        "name": "n6_text",
         "display_name": "正向提示词",
-        "type": "string",
+        "description": "描述希望生成的画面",
+        "value_type": "string",
         "required": true,
-        "default_value": "beautiful scenery nature glass bottle landscape, , purple galaxy bottle,"
+        "default_value": "beautiful scenery",
+        "bindings": [
+          {
+            "node_id": "6",
+            "field": "text",
+            "binding_type": "scalar"
+          }
+        ],
+        "sort_order": 10
       },
       {
-        "key": "n7_text",
-        "display_name": "反向提示词",
-        "type": "string",
+        "name": "n4_sampler_name",
+        "display_name": "采样器",
+        "description": "选择采样算法",
+        "value_type": "string",
         "required": true,
-        "default_value": "text, watermark"
+        "default_value": "euler",
+        "ui_schema": {
+          "control": "select",
+          "options_source": "comfy_node_def",
+          "options": [
+            { "label": "euler", "value": "euler" },
+            { "label": "dpmpp_2m", "value": "dpmpp_2m" }
+          ]
+        },
+        "bindings": [
+          {
+            "node_id": "4",
+            "field": "sampler_name",
+            "binding_type": "scalar"
+          }
+        ],
+        "sort_order": 20
       },
       {
-        "key": "n3_seed",
-        "display_name": "seed",
-        "type": "int",
+        "name": "n3_seed",
+        "display_name": "随机种子",
+        "description": "使用相同种子有助于复现结果",
+        "value_type": "int",
         "required": true,
-        "default_value": 156680208700286
+        "default_value": 156680208700286,
+        "bindings": [
+          {
+            "node_id": "3",
+            "field": "seed",
+            "binding_type": "scalar"
+          }
+        ],
+        "sort_order": 30
+      },
+      {
+        "name": "n10_image",
+        "display_name": "参考图片",
+        "description": "请先上传本地图片，再传 asset_uri",
+        "value_type": "image_input",
+        "required": true,
+        "default_value": "",
+        "bindings": [
+          {
+            "node_id": "10",
+            "field": "image",
+            "binding_type": "comfy_input_image"
+          }
+        ],
+        "sort_order": 40
       }
     ],
     "candidate_output_manifest": [
       {
-        "key": "n9_images",
-        "type": "image"
+        "name": "n9_images",
+        "type": "image",
+        "description": "生成的最终图片",
+        "node_id": "9",
+        "output_key": "images",
+        "file_index": 0,
+        "history_count": 1,
+        "sort_order": 10
       }
     ]
   }

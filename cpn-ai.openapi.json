@@ -1126,6 +1126,98 @@
         "security": []
       }
     },
+    "/api/open/v2/instance/set_idle_close": {
+      "post": {
+        "summary": "设置空闲关机",
+        "deprecated": false,
+        "description": "设置实例在持续低 GPU 和显存利用率达到指定时间后自动关机，传 idle_period_minutes=0 可取消。",
+        "tags": [
+          "实例管理"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "instance_uuid",
+                  "idle_period_minutes"
+                ],
+                "properties": {
+                  "instance_uuid": {
+                    "type": "string",
+                    "description": "实例 UUID"
+                  },
+                  "idle_period_minutes": {
+                    "type": "integer",
+                    "enum": [
+                      0,
+                      10,
+                      30,
+                      60,
+                      120
+                    ],
+                    "description": "连续空闲时间，单位分钟。0 表示取消空闲关机"
+                  },
+                  "destroy": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "自动关机时是否同时销毁实例。订阅制实例不支持 true；取消空闲关机时会强制按 false 处理"
+                  },
+                  "idle_gpu_threshold": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "default": 0,
+                    "description": "GPU 利用率空闲阈值，0 使用平台全局阈值，100 跳过 GPU 利用率检查"
+                  },
+                  "idle_fb_threshold": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "default": 0,
+                    "description": "显存利用率空闲阈值，0 使用平台全局阈值，100 跳过显存利用率检查"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "设置结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "响应码，0 表示成功"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "响应信息"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/open/v2/instance/destroy": {
       "post": {
         "summary": "实例销毁",
@@ -2071,16 +2163,151 @@
                         },
                         "editable_parameter_manifest": {
                           "type": "array",
+                          "description": "可编辑输入参数清单。提交运行时 inputs 的 key 必须使用条目的 name",
                           "items": {
                             "type": "object",
-                            "additionalProperties": true
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "description": "参数唯一名称，也是 inputs 使用的 key"
+                              },
+                              "display_name": {
+                                "type": "string",
+                                "description": "展示名称"
+                              },
+                              "description": {
+                                "type": "string",
+                                "description": "参数说明"
+                              },
+                              "value_type": {
+                                "type": "string",
+                                "enum": [
+                                  "string",
+                                  "int",
+                                  "float",
+                                  "bool",
+                                  "image_input",
+                                  "video_input",
+                                  "audio_input",
+                                  "file_input",
+                                  "image",
+                                  "video",
+                                  "audio",
+                                  "file"
+                                ],
+                                "description": "参数值类型"
+                              },
+                              "required": {
+                                "type": "boolean",
+                                "description": "是否必须提供"
+                              },
+                              "default_value": {
+                                "description": "发布时记录的默认值"
+                              },
+                              "ui_schema": {
+                                "type": "object",
+                                "description": "输入控件定义；control=select 时从 options 中选择",
+                                "properties": {
+                                  "control": {
+                                    "type": "string",
+                                    "enum": [
+                                      "input",
+                                      "select"
+                                    ]
+                                  },
+                                  "options_source": {
+                                    "type": "string"
+                                  },
+                                  "options": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "label": {
+                                          "type": "string"
+                                        },
+                                        "value": {
+                                          "description": "提交时使用的原始 JSON 值"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "bindings": {
+                                "type": "array",
+                                "description": "内部节点绑定，调用方无需提交",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "node_id": {
+                                      "type": "string"
+                                    },
+                                    "field": {
+                                      "type": "string"
+                                    },
+                                    "binding_type": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              },
+                              "sort_order": {
+                                "type": "integer"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "value_type",
+                              "required"
+                            ]
                           }
                         },
                         "candidate_output_manifest": {
                           "type": "array",
+                          "description": "输出参数清单",
                           "items": {
                             "type": "object",
-                            "additionalProperties": true
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "description": "输出唯一名称"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "image",
+                                  "video",
+                                  "audio"
+                                ]
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "node_id": {
+                                "type": "string"
+                              },
+                              "output_key": {
+                                "type": "string"
+                              },
+                              "file_index": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "history_count": {
+                                "type": "integer",
+                                "minimum": 0
+                              },
+                              "sort_order": {
+                                "type": "integer"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "type",
+                              "node_id",
+                              "output_key"
+                            ]
                           }
                         }
                       }
@@ -2135,7 +2362,7 @@
                   "inputs": {
                     "type": "object",
                     "additionalProperties": true,
-                    "description": "工作流输入参数。历史 Seedance 视频工作流可在 inputs 中传 contains_real_person_material=true；新接入外部视频模型时，建议使用 /api/open/v2/model-runs/videos。"
+                    "description": "工作流输入参数。key 必须来自详情接口 editable_parameter_manifest[].name，值按 value_type 和 ui_schema 填写；未声明的 key 会被拒绝。"
                   },
                   "idempotency_key": {
                     "type": "string",

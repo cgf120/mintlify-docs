@@ -39,6 +39,7 @@
         "groups": [
           {
             "group": "快速开始",
+            "expanded": true,
             "pages": [
               "userguide/introduction",
               "userguide/quickstart",
@@ -52,18 +53,28 @@
         "groups": [
           {
             "group": "API 介绍",
+            "expanded": true,
             "pages": [
               "api-reference/introduction"
             ]
           },
           {
             "group": "Pod管理",
+            "expanded": true,
             "pages": [
               "api-reference/pod/list"
             ]
           },
           {
+            "group": "GPU管理",
+            "expanded": true,
+            "pages": [
+              "api-reference/gpu/list"
+            ]
+          },
+          {
             "group": "镜像管理",
+            "expanded": true,
             "pages": [
               "api-reference/image/market-list",
               "api-reference/image/private-list",
@@ -72,6 +83,7 @@
           },
           {
             "group": "实例管理",
+            "expanded": true,
             "pages": [
               "api-reference/instance/list",
               "api-reference/instance/info",
@@ -88,43 +100,27 @@
             ]
           },
           {
-            "group": "余额管理",
+            "group": "通用接口",
+            "expanded": true,
             "pages": [
-              "api-reference/balance/info"
-            ]
-          },
-          {
-            "group": "充值管理",
-            "pages": [
-              "api-reference/recharge/list"
-            ]
-          },
-          {
-            "group": "账单管理",
-            "pages": [
-              "api-reference/bill/list"
-            ]
-          },
-          {
-            "group": "算力卡管理",
-            "pages": [
-              "api-reference/card/list"
-            ]
-          },
-          {
-            "group": "GPU管理",
-            "pages": [
-              "api-reference/gpu/list"
-            ]
-          },
-          {
-            "group": "外部模型任务",
-            "pages": [
-              "api-reference/model-runs/video-submit",
-              "api-reference/model-runs/list",
-              "api-reference/model-runs/info",
-              "api-reference/model-runs/cancel",
-              "api-reference/model-runs/events"
+              {
+                "group": "财务接口",
+                "expanded": true,
+                "pages": [
+                  "api-reference/balance/info",
+                  "api-reference/recharge/list",
+                  "api-reference/bill/list",
+                  "api-reference/card/list"
+                ]
+              },
+              {
+                "group": "资源管理",
+                "expanded": true,
+                "pages": [
+                  "api-reference/workflow/assets-upload",
+                  "api-reference/workflow/assets-info"
+                ]
+              }
             ]
           }
         ]
@@ -133,7 +129,15 @@
         "tab": "工作流管理",
         "groups": [
           {
+            "group": "API 介绍",
+            "expanded": true,
+            "pages": [
+              "api-reference/workflow/introduction"
+            ]
+          },
+          {
             "group": "工作流市场",
+            "expanded": true,
             "pages": [
               "api-reference/workflow/market-list",
               "api-reference/workflow/market-info"
@@ -141,6 +145,7 @@
           },
           {
             "group": "运行管理",
+            "expanded": true,
             "pages": [
               "api-reference/workflow/run-submit",
               "api-reference/workflow/run-list",
@@ -149,10 +154,27 @@
             ]
           },
           {
-            "group": "资源管理",
+            "group": "通用接口",
+            "expanded": true,
             "pages": [
-              "api-reference/workflow/assets-upload",
-              "api-reference/workflow/assets-info"
+              {
+                "group": "财务接口",
+                "expanded": true,
+                "pages": [
+                  "api-reference/balance/info",
+                  "api-reference/recharge/list",
+                  "api-reference/bill/list",
+                  "api-reference/card/list"
+                ]
+              },
+              {
+                "group": "资源管理",
+                "expanded": true,
+                "pages": [
+                  "api-reference/workflow/assets-upload",
+                  "api-reference/workflow/assets-info"
+                ]
+              }
             ]
           }
         ]
@@ -162,17 +184,17 @@
         "groups": [
           {
             "group": "概览",
+            "expanded": true,
             "pages": [
               "llm-gateway/introduction"
             ]
           },
           {
             "group": "直接 API 调用",
+            "expanded": true,
             "pages": [
               "llm-gateway/direct-api",
               "llm-gateway/api/models",
-              "llm-gateway/api/assets-upload",
-              "llm-gateway/api/assets-info",
               "llm-gateway/api/chat-completions",
               "llm-gateway/api/responses",
               "llm-gateway/api/image-generations",
@@ -184,7 +206,31 @@
             ]
           },
           {
+            "group": "通用接口",
+            "expanded": true,
+            "pages": [
+              {
+                "group": "财务接口",
+                "expanded": true,
+                "pages": [
+                  "api-reference/balance/info",
+                  "api-reference/recharge/list",
+                  "api-reference/bill/list"
+                ]
+              },
+              {
+                "group": "资源管理",
+                "expanded": true,
+                "pages": [
+                  "llm-gateway/api/assets-upload",
+                  "llm-gateway/api/assets-info"
+                ]
+              }
+            ]
+          },
+          {
             "group": "SDK 与工具接入",
+            "expanded": true,
             "pages": [
               "llm-gateway/openai-sdk",
               "llm-gateway/claude-code",

@@ -14,7 +14,7 @@ authMethod: "bearer"
 </Warning>
 
 <Info>
-  图片、视频、音频等普通媒体字段直接传资源字符串：公网 URL、`data:image/<format>;base64,<data>` 或 `asset://asset_xxx`。需要声明素材角色或在提示词中引用素材时，使用 `{ "uri": "...", "role": "reference_image", "label": "人物A" }`。本地文件建议先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，再把返回的 `asset_uri` 字段值放入 `inputs`。
+  调用本接口前，必须先查询 [工作流详情](/api-reference/workflow/market-info)，并根据返回的 `editable_parameter_manifest` 组装 `inputs`。参数名使用 manifest 条目的 `name`，参数值按 `value_type` 和 `ui_schema` 填写。
 </Info>
 
 ## 请求参数
@@ -28,11 +28,7 @@ authMethod: "bearer"
 </ParamField>
 
 <ParamField body="inputs" type="object">
-  工作流输入参数。key 来自详情接口的 `editable_parameter_manifest`
-</ParamField>
-
-<ParamField body="inputs.contains_real_person_material" type="boolean">
-  历史 Seedance 视频工作流兼容参数。新接入外部视频模型时，建议使用 [外部模型任务接口](/api-reference/model-runs/video-submit)。
+  工作流输入参数。每个 key 必须来自详情接口 `editable_parameter_manifest[].name`；未声明的 key 会被拒绝。具体类型、下拉选项、必填规则和文件传法请参考 [工作流详情中的参数填写规则](/api-reference/workflow/market-info)
 </ParamField>
 
 <ParamField body="idempotency_key" type="string" required>
@@ -42,6 +38,18 @@ authMethod: "bearer"
 <ParamField body="accept_external_cost_risk" type="boolean">
   是否确认接受第三方模型费用风险。工作流可能产生外部模型费用时应传 `true`
 </ParamField>
+
+## `inputs` 填写规则
+
+1. 调用工作流详情接口，读取 `revision_id` 和 `editable_parameter_manifest`
+2. 对每个 `required=true` 的条目，在 `inputs` 中使用条目的 `name` 作为 key
+3. `string` 传字符串，`int`/`float` 传 JSON 数字，`bool` 传 JSON 布尔值
+4. `ui_schema.control="select"` 时传 `ui_schema.options[].value` 中的一个，并保留该值原本的 JSON 类型
+5. 图片、视频、音频或文件参数需要传资源字符串；本地文件先调用 [上传工作流资源](/api-reference/workflow/assets-upload)，再传返回的 `asset_uri`
+
+<Warning>
+  不要使用 `display_name` 或 `bindings[].field` 作为 `inputs` 的 key，也不要额外传 manifest 中不存在的字段。数字参数当前没有统一的最大值、最小值或步长，详情接口中的完整规则见 [`editable_parameter_manifest` 说明](/api-reference/workflow/market-info)。
+</Warning>
 
 ## 响应参数
 
@@ -154,19 +162,10 @@ payload = {
     "workflow_id": "wf_861ef31e94dcfb10e6e7",
     "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
     "inputs": {
-        "generation_category": "reference_to_video",
-        "model": "doubao-seedance-2-0-fast-260128",
-        "prompt": "@人物A cinematic portrait video",
-        "images": [
-            {
-                "uri": "asset://asset_reference_image",
-                "label": "人物A",
-                "role": "reference_image"
-            }
-        ],
-        "contains_real_person_material": true,
-        "resolution": "720p",
-        "duration": "5"
+        "n6_text": "一只橘猫坐在窗边，电影感光线",
+        "n4_sampler_name": "euler",
+        "n3_seed": 156680208700286,
+        "n10_image": "asset://asset_38d2ff7769fb3b7267039941547e6a78"
     },
     "idempotency_key": str(uuid.uuid4()),
     "accept_external_cost_risk": False
@@ -184,17 +183,10 @@ axios.post('https://www.chenyu.cn/api/open/v2/workflow/run/submit', {
   workflow_id: 'wf_861ef31e94dcfb10e6e7',
   revision_id: 'wfr_f9f2a2dcb99d73b0c3aa',
   inputs: {
-    generation_category: 'reference_to_video',
-    model: 'doubao-seedance-2-0-fast-260128',
-    prompt: '@人物A cinematic portrait video',
-    images: [{
-      uri: 'asset://asset_reference_image',
-      label: '人物A',
-      role: 'reference_image'
-    }],
-    contains_real_person_material: true,
-    resolution: '720p',
-    duration: '5'
+    n6_text: '一只橘猫坐在窗边，电影感光线',
+    n4_sampler_name: 'euler',
+    n3_seed: 156680208700286,
+    n10_image: 'asset://asset_38d2ff7769fb3b7267039941547e6a78'
   },
   idempotency_key: crypto.randomUUID(),
   accept_external_cost_risk: false
@@ -216,19 +208,10 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
     "workflow_id": "wf_861ef31e94dcfb10e6e7",
     "revision_id": "wfr_f9f2a2dcb99d73b0c3aa",
     "inputs": {
-      "generation_category": "reference_to_video",
-      "model": "doubao-seedance-2-0-fast-260128",
-      "prompt": "@人物A cinematic portrait video",
-      "images": [
-        {
-          "uri": "asset://asset_reference_image",
-          "label": "人物A",
-          "role": "reference_image"
-        }
-      ],
-      "contains_real_person_material": true,
-      "resolution": "720p",
-      "duration": "5"
+      "n6_text": "一只橘猫坐在窗边，电影感光线",
+      "n4_sampler_name": "euler",
+      "n3_seed": 156680208700286,
+      "n10_image": "asset://asset_38d2ff7769fb3b7267039941547e6a78"
     },
     "idempotency_key": "run_20260508_001",
     "accept_external_cost_risk": false
@@ -236,45 +219,6 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
 ```
 
 </CodeGroup>
-
-## 提示词引用素材
-
-历史 Seedance 工作流或外部视频模型工作流支持在 `inputs` 的资源对象中传 `label`，并在 `inputs.prompt` 中使用 `@label` 指向该素材。
-
-```json
-{
-  "workflow_id": "wf_xxx",
-  "revision_id": "wfr_xxx",
-  "idempotency_key": "run_20260613_ref_001",
-  "inputs": {
-    "generation_category": "reference_to_video",
-    "model": "doubao-seedance-2-0-fast-260128",
-    "prompt": "@阿九 携手 @沈渡 跳舞",
-    "images": [
-      {
-        "uri": "asset://asset_a252553f9364ad0fa635cb7c48793491",
-        "label": "阿九",
-        "role": "reference_image"
-      },
-      {
-        "uri": "asset://asset_cf7584e3e836a2b3ee65ef072a71fdd6",
-        "label": "沈渡",
-        "role": "reference_image"
-      }
-    ],
-    "duration": 5,
-    "resolution": "720p",
-    "ratio": "16:9"
-  }
-}
-```
-
-说明：
-
-- `label` 建议直接写显示名，例如 `阿九`，不需要带 `@`
-- `prompt` 中写 `@阿九`，也兼容 `{{阿九}}` 和 `{{ 阿九 }}`
-- 同一个请求里 `label` 不能重复
-- 服务端会把自定义标签绑定到当前请求中的资源顺序，例如图片会映射为上游需要的 `@图1`、`@图2`
 
 ## 响应示例
 
@@ -303,12 +247,12 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/workflow/run/submit" \
 ```json
 {
   "code": 1,
-  "msg": "Workflow input content is invalid.",
+  "msg": "工作流输入参数无效",
   "data": {
     "error": {
-      "reason": "Workflow input content is invalid.",
-      "detail": "input n4_video must be an uploaded file URL or file id",
-      "engine_code": "INVALID_WORKFLOW_INPUT",
+      "reason": "工作流输入参数无效",
+      "detail": "input parameter \"unknown_field\" is not declared by workflow manifest",
+      "engine_code": "INVALID_INPUT_PARAMETER",
       "status_code": 400
     }
   }

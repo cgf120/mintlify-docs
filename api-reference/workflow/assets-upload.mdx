@@ -1,6 +1,6 @@
 ---
 title: "上传工作流资源"
-api: "POST https://www.chenyu.cn/api/open/v2/assets"
+openapi: "upload-assets.openapi.json POST /api/open/v2/assets"
 description: "上传用于工作流输入的临时资源"
 authMethod: "bearer"
 ---
@@ -173,57 +173,24 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/assets" \
 
 ## 在工作流中使用
 
-媒体字段支持三种写法：
+先查询 [工作流详情](/api-reference/workflow/market-info)。当 `editable_parameter_manifest[].value_type` 表示图片、视频、音频或文件输入时，在 `inputs` 中使用该条目的 `name` 作为 key，参数值支持三种资源字符串：
 
 ```json
 {
-  "image": "https://example.com/input.png"
+  "n10_image": "https://example.com/input.png"
 }
 ```
 
 ```json
 {
-  "image": "data:image/png;base64,iVBORw0KGgo..."
+  "n10_image": "data:image/png;base64,iVBORw0KGgo..."
 }
 ```
 
 ```json
 {
-  "image": "asset://asset_38d2ff7769fb3b7267039941547e6a78"
+  "n10_image": "asset://asset_38d2ff7769fb3b7267039941547e6a78"
 }
 ```
 
-需要声明首帧、尾帧、参考素材角色，或需要在提示词里用 `@标签` 引用素材时，可以使用对象写法：
-
-```json
-{
-  "first_frame": {
-    "uri": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
-    "role": "first_frame",
-    "label": "首帧"
-  }
-}
-```
-
-多素材引用示例：
-
-```json
-{
-  "generation_category": "reference_to_video",
-  "prompt": "@阿九 和 @沈渡 在舞台上跳舞",
-  "images": [
-    {
-      "uri": "asset://asset_person_a",
-      "label": "阿九",
-      "role": "reference_image"
-    },
-    {
-      "uri": "asset://asset_person_b",
-      "label": "沈渡",
-      "role": "reference_image"
-    }
-  ]
-}
-```
-
-`label` 是素材显示名，不需要带 `@`；提示词里引用时写 `@阿九`。同一个请求里的 `label` 不能重复，也兼容 `{{阿九}}` 和 `{{ 阿九 }}` 写法。
+本地文件优先使用本接口返回的 `asset_uri`。参数名、必填规则和文件类型均以当前工作流详情返回的 manifest 为准，完整说明见 [`editable_parameter_manifest` 输入参数清单](/api-reference/workflow/market-info)。

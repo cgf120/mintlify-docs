@@ -1,0 +1,258 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "晨羽智云资源上传接口",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/open/v2/assets": {
+      "post": {
+        "operationId": "uploadWorkflowAsset",
+        "summary": "上传工作流资源",
+        "description": "上传用于工作流输入的临时资源。请求必须使用 multipart/form-data。",
+        "servers": [
+          {
+            "url": "https://www.chenyu.cn",
+            "description": "生产环境"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "上传结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowAssetUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/assets": {
+      "post": {
+        "operationId": "uploadGatewayAsset",
+        "summary": "上传大模型网关资源",
+        "description": "上传用于大模型网关输入的临时资源。请求必须使用 multipart/form-data。",
+        "servers": [
+          {
+            "url": "https://api.chenyu.cn",
+            "description": "生产环境"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "上传结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Asset"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "请求未使用 multipart/form-data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenAIErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssetUploadRequest": {
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary",
+            "description": "要上传的本地文件，单个文件最大 100MB"
+          },
+          "media_type": {
+            "type": "string",
+            "enum": [
+              "image",
+              "video",
+              "audio",
+              "file"
+            ],
+            "description": "资源类型。不传时服务端根据文件类型推断"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "temp_input"
+            ],
+            "default": "temp_input",
+            "description": "资源用途，当前仅支持 temp_input"
+          },
+          "ttl_hours": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 48,
+            "description": "临时资源有效小时数"
+          }
+        }
+      },
+      "WorkflowAssetUploadResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "响应码，0 表示成功"
+          },
+          "msg": {
+            "type": "string",
+            "description": "响应信息"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Asset"
+          }
+        },
+        "required": [
+          "code",
+          "msg",
+          "data"
+        ]
+      },
+      "Asset": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "资源 ID；大模型网关响应包含此字段"
+          },
+          "asset_id": {
+            "type": "string",
+            "description": "资源 ID"
+          },
+          "asset_uri": {
+            "type": "string",
+            "example": "asset://asset_38d2ff7769fb3b7267039941547e6a78",
+            "description": "提交工作流或模型请求时使用的资源引用地址"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "资源访问地址"
+          },
+          "content_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "资源内容访问地址"
+          },
+          "signed_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "带签名的临时访问地址"
+          },
+          "media_type": {
+            "type": "string",
+            "description": "资源类型"
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "MIME 类型"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "format": "int64",
+            "description": "文件大小，单位字节"
+          },
+          "purpose": {
+            "type": "string",
+            "description": "资源用途"
+          },
+          "persistent": {
+            "type": "boolean",
+            "description": "是否为长期资源"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "临时资源过期时间"
+          },
+          "status": {
+            "type": "string",
+            "description": "资源状态"
+          },
+          "original_filename": {
+            "type": "string",
+            "description": "原始文件名"
+          }
+        }
+      },
+      "OpenAIErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "param": {
+                "type": "string",
+                "nullable": true
+              },
+              "code": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API Key，格式：Bearer your_api_key"
+      }
+    }
+  }
+}
