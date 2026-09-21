@@ -1521,12 +1521,32 @@
             }
           },
           {
-            "name": "order_channel",
+            "name": "charge_channel",
             "in": "query",
             "description": "扣费渠道\n1.余额消费\n2.算力卡消费",
             "required": false,
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "name": "order_type",
+            "in": "query",
+            "description": "按单个业务类型筛选。必须为非负整数；0表示不限制。不能与 order_types 同时使用",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "order_types",
+            "in": "query",
+            "description": "按多个业务类型筛选，使用英文逗号分隔的正整数，最多50个。不能与 order_type 同时使用",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "8,9,30"
             }
           },
           {
@@ -2152,6 +2172,15 @@
                         "quote_amount": {
                           "type": "string",
                           "description": "预估报价金额，实际结算以运行完成后的实际消耗为准"
+                        },
+                        "gpu_model": {
+                          "type": "string",
+                          "enum": [
+                            "4080",
+                            "4090D",
+                            "5090"
+                          ],
+                          "description": "当前发布版本使用的GPU型号键；历史值缺失或无效时返回4080"
                         },
                         "may_incur_external_model_cost": {
                           "type": "boolean",

@@ -73,6 +73,10 @@ authMethod: "bearer"
       预估报价金额。实际结算以运行完成后的实际消耗为准
     </ResponseField>
 
+    <ResponseField name="gpu_model" type="string">
+      当前发布版本使用的 GPU 型号键。当前可能返回 `4080`、`4090D` 或 `5090`；历史版本缺失或值无效时返回 `4080`
+    </ResponseField>
+
     <ResponseField name="may_incur_external_model_cost" type="boolean">
       是否可能产生第三方模型费用
     </ResponseField>
@@ -252,6 +256,7 @@ params = {
 response = requests.get(url, headers=headers, params=params)
 detail = response.json()["data"]
 print(detail["revision_id"])
+print(detail["gpu_model"])
 print(detail["editable_parameter_manifest"])
 ```
 
@@ -282,6 +287,7 @@ curl -X GET "https://www.chenyu.cn/api/open/v2/workflow/market/info?workflow_id=
     },
     "quote_currency": "CNY",
     "quote_amount": "0.03000000",
+    "gpu_model": "4090D",
     "may_incur_external_model_cost": false,
     "external_cost_notice": "",
     "editable_parameter_manifest": [
