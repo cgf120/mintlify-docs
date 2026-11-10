@@ -1,13 +1,17 @@
 ---
 title: "通过Pod创建实例"
 api: "POST https://www.chenyu.cn/api/open/v2/instance/create_by_pod"
-description: "使用指定的Pod创建GPU实例"
+description: "使用指定的Pod创建GPU实例，支持可选幂等键"
 authMethod: "bearer"
 ---
 
 # 通过Pod创建实例
 
 使用应用市场中的Pod创建一个新的GPU实例。
+
+<Info>
+  `idempotency_key` 可选。传入后，同一用户使用相同幂等键重试创建时最多产生一台实例，不会重复扣费。超时重试、网关重发等场景建议始终携带稳定的业务单号或 UUID。不传时行为与历史接口一致。
+</Info>
 
 ## 请求参数
 
@@ -27,10 +31,37 @@ authMethod: "bearer"
   使用GPU数量，可选值：1/2/4/8
 </ParamField>
 
+<ParamField body="charging_type" type="integer">
+  计费类型。`1` 按量（默认），`2` 包日，`3` 包周，`4` 包月
+</ParamField>
+
+<ParamField body="charging_num" type="integer">
+  计费数量（几天/几周/几月）。包年包月时默认 `1`
+</ParamField>
+
+<ParamField body="idempotency_key" type="string">
+  幂等键，由调用方生成。长度 1～128（trim 后），建议可打印 ASCII。同一 API Key 对应用户下，相同 key 在成功记录有效期内（默认 7 天）最多创建一台实例。推荐使用业务订单号、任务 ID 或 UUID
+</ParamField>
+
+## 幂等行为
+
+| 场景 | `code` | `data.idempotent` | 说明 |
+| --- | --- | --- | --- |
+| 不传 `idempotency_key` | `0` | `false` | 每次请求都会新建实例，与历史行为一致 |
+| 有 key，首次创建成功 | `0` | `false` | 真实创建并扣费 |
+| 有 key，相同参数重放 | `0` | `true` | 返回同一 `instance_uuid`，不再次创建或扣费；`status` 等字段为当前实例视图 |
+| 有 key，创建进行中 | 非 `0` | - | `msg` 为创建中提示，`data.instance_uuid` 为已预分配 uuid，可用 [查询实例](/api-reference/instance/info) 轮询 |
+| 有 key，参数与首次不一致 | 非 `0` | - | 拒绝创建，例如改了 `gpu_nums` / `pod_uuid` |
+| 有 key，TTL 内实例已销毁 | 非 `0` | - | 拒绝新建，需更换 key 或等记录过期后再用 |
+
+纳入参数一致性校验的字段：`pod_uuid`、`pod_tag`、`gpu_uuid`、`gpu_nums`、`charging_type`、`charging_num`。空 `pod_tag` 与显式 tag 视为不同意图。`create_by_pod` 与 `create_by_image` 共用同一用户下的 key 命名空间，不可混用同一 key。
+
+成功记录默认保留 7 天；创建中（pending）默认约 30 分钟。过期后同一 key 可再次用于新的创建意图。
+
 ## 响应参数
 
 <ResponseField name="code" type="integer">
-  响应码
+  响应码，`0` 表示成功
 </ResponseField>
 
 <ResponseField name="msg" type="string">
@@ -39,78 +70,100 @@ authMethod: "bearer"
 
 <ResponseField name="data" type="object">
   返回的实例数据
-  
+
   <Expandable title="data">
     <ResponseField name="instance_uuid" type="string">
       实例uuid
     </ResponseField>
-    
+
     <ResponseField name="status" type="integer">
-      实例状态
+      实例状态（重放时为当前实时状态）
     </ResponseField>
-    
+
     <ResponseField name="title" type="string">
       实例名称
     </ResponseField>
-    
+
     <ResponseField name="create_time" type="integer">
       实例创建时间，秒级时间戳
     </ResponseField>
-    
+
     <ResponseField name="start_time" type="integer">
       实例启动时间，秒级时间戳
     </ResponseField>
-    
+
     <ResponseField name="save_image_status" type="integer">
       实例镜像保存状态
       - `1`: 上传中
       - `2`: 上传成功
       - `3`: 上传失败
     </ResponseField>
-    
+
     <ResponseField name="charging_type" type="integer">
       计费类型
     </ResponseField>
-    
+
+    <ResponseField name="charging_num" type="integer">
+      计费数量
+    </ResponseField>
+
     <ResponseField name="shutdown_regular" type="object">
       定时关机设置
-      
+
       <Expandable title="shutdown_regular">
         <ResponseField name="shutdown_time" type="integer">
           关机时间，秒级时间戳
         </ResponseField>
-        
+
         <ResponseField name="enable" type="boolean">
           是否启用定时关机
         </ResponseField>
       </Expandable>
     </ResponseField>
-    
+
     <ResponseField name="image_uuid" type="string">
       实例使用的镜像uuid
     </ResponseField>
-    
+
     <ResponseField name="image_name" type="string">
       实例使用的镜像名称
     </ResponseField>
-    
+
     <ResponseField name="image_tag" type="string">
       实例使用的镜像tag
     </ResponseField>
-    
+
     <ResponseField name="gpu_uuid" type="string">
       实例使用的gpu uuid
     </ResponseField>
-    
+
     <ResponseField name="gpu_name" type="string">
       实例使用的gpu名称
     </ResponseField>
-    
+
     <ResponseField name="gpu_nums" type="integer">
       实例使用的gpu数量
     </ResponseField>
+
+    <ResponseField name="idempotent" type="boolean">
+      是否为幂等重放。`true` 表示本次未再次执行创建副作用，返回的是同一幂等键下已完成的创建结果；`false` 表示本次真实创建
+    </ResponseField>
   </Expandable>
 </ResponseField>
+
+## 幂等相关错误
+
+常见 `msg`（HTTP 多为 200，业务 `code` 非 0）：
+
+| `msg` | 说明 |
+| --- | --- |
+| `idempotency_key 不合法` | key 为空、超长或含控制字符 |
+| `idempotency_key 与已有请求参数不一致` | 同 key 但创建意图参数不同 |
+| `实例创建中，请使用 instance_uuid 查询状态` | 首次创建仍在进行，`data` 含预分配 `instance_uuid` |
+| `幂等记录有效但实例已销毁，请更换 idempotency_key` | TTL 内实例已销毁，不可用同 key 再建 |
+| `幂等记录失败且不可重试，请更换 idempotency_key` | 不可重试失败态，需更换 key |
+
+可重试失败（如余额不足、参数校验失败且未产生有效实例）允许同一 key 在修正条件后再次创建。
 
 ## 代码示例
 
@@ -119,6 +172,7 @@ authMethod: "bearer"
 ```python Python
 import requests
 from datetime import datetime
+import uuid
 
 url = "https://www.chenyu.cn/api/open/v2/instance/create_by_pod"
 headers = {
@@ -130,7 +184,8 @@ data = {
     "pod_uuid": "pod_12345678-1234-1234-1234-123456789012",
     "pod_tag": "v2.0",
     "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
-    "gpu_nums": 1
+    "gpu_nums": 1,
+    "idempotency_key": f"order-{uuid.uuid4()}"
 }
 
 response = requests.post(url, headers=headers, json=data)
@@ -139,24 +194,28 @@ result = response.json()
 if result['code'] == 0:
     instance = result['data']
     create_time = datetime.fromtimestamp(instance['create_time'])
-    
+
     print(f"实例创建成功!")
     print(f"实例UUID: {instance['instance_uuid']}")
+    print(f"是否幂等重放: {instance.get('idempotent', False)}")
     print(f"实例名称: {instance['title']}")
     print(f"GPU名称: {instance['gpu_name']}")
     print(f"GPU数量: {instance['gpu_nums']}")
     print(f"创建时间: {create_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    if instance['server_url']:
+
+    if instance.get('server_url'):
         print("服务访问地址:")
         for url in instance['server_url']:
             print(f"  - {url}")
 else:
     print(f"创建失败: {result['msg']}")
+    if isinstance(result.get('data'), dict) and result['data'].get('instance_uuid'):
+        print(f"可查询的实例UUID: {result['data']['instance_uuid']}")
 ```
 
 ```javascript JavaScript
 const axios = require('axios');
+const { randomUUID } = require('crypto');
 
 const url = 'https://www.chenyu.cn/api/open/v2/instance/create_by_pod';
 const headers = {
@@ -168,25 +227,27 @@ const data = {
     pod_uuid: 'pod_12345678-1234-1234-1234-123456789012',
     pod_tag: 'v2.0',
     gpu_uuid: 'gpu_87654321-4321-4321-4321-210987654321',
-    gpu_nums: 1
+    gpu_nums: 1,
+    idempotency_key: `order-${randomUUID()}`
 };
 
 axios.post(url, data, { headers })
     .then(response => {
         const result = response.data;
-        
+
         if (result.code === 0) {
             const instance = result.data;
             const createTime = new Date(instance.create_time * 1000);
-            
+
             console.log('实例创建成功!');
             console.log(`实例UUID: ${instance.instance_uuid}`);
+            console.log(`是否幂等重放: ${instance.idempotent === true}`);
             console.log(`实例名称: ${instance.title}`);
             console.log(`GPU名称: ${instance.gpu_name}`);
             console.log(`GPU数量: ${instance.gpu_nums}`);
             console.log(`创建时间: ${createTime.toLocaleString()}`);
-            
-            if (instance.server_url.length > 0) {
+
+            if (instance.server_url && instance.server_url.length > 0) {
                 console.log('服务访问地址:');
                 instance.server_url.forEach(url => {
                     console.log(`  - ${url}`);
@@ -194,10 +255,13 @@ axios.post(url, data, { headers })
             }
         } else {
             console.log(`创建失败: ${result.msg}`);
+            if (result.data && result.data.instance_uuid) {
+                console.log(`可查询的实例UUID: ${result.data.instance_uuid}`);
+            }
         }
     })
     .catch(error => {
-        console.error('Error:', error.response.data);
+        console.error('Error:', error.response?.data || error.message);
     });
 ```
 
@@ -209,7 +273,8 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/instance/create_by_pod" \
     "pod_uuid": "pod_12345678-1234-1234-1234-123456789012",
     "pod_tag": "v2.0",
     "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
-    "gpu_nums": 1
+    "gpu_nums": 1,
+    "idempotency_key": "client-order-20261109-001"
   }'
 ```
 
@@ -217,10 +282,12 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/instance/create_by_pod" \
 
 ## 响应示例
 
+首次创建成功：
+
 ```json
 {
   "code": 0,
-  "msg": "success",
+  "msg": "创建成功",
   "data": {
     "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
     "status": 1,
@@ -229,6 +296,7 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/instance/create_by_pod" \
     "start_time": 1703145660,
     "save_image_status": 2,
     "charging_type": 1,
+    "charging_num": 1,
     "shutdown_regular": {
       "shutdown_time": 1703232000,
       "enable": true
@@ -238,7 +306,50 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/instance/create_by_pod" \
     "image_tag": "v2.0",
     "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
     "gpu_name": "NVIDIA RTX 4090",
-    "gpu_nums": 1
+    "gpu_nums": 1,
+    "idempotent": false
+  }
+}
+```
+
+相同 `idempotency_key` 重放（实例可能已变为运行中）：
+
+```json
+{
+  "code": 0,
+  "msg": "创建成功",
+  "data": {
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012",
+    "status": 2,
+    "title": "PyTorch深度学习实例",
+    "create_time": 1703145600,
+    "start_time": 1703145660,
+    "save_image_status": 2,
+    "charging_type": 1,
+    "charging_num": 1,
+    "shutdown_regular": {
+      "shutdown_time": 1703232000,
+      "enable": true
+    },
+    "image_uuid": "img_87654321-4321-4321-4321-210987654321",
+    "image_name": "PyTorch 2.0 环境",
+    "image_tag": "v2.0",
+    "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
+    "gpu_name": "NVIDIA RTX 4090",
+    "gpu_nums": 1,
+    "idempotent": true
+  }
+}
+```
+
+创建进行中（并发或超时重试撞上 pending）：
+
+```json
+{
+  "code": 1,
+  "msg": "实例创建中，请使用 instance_uuid 查询状态",
+  "data": {
+    "instance_uuid": "inst_12345678-1234-1234-1234-123456789012"
   }
 }
 ```

@@ -45,7 +45,7 @@ curl -X GET "https://www.chenyu.cn/api/open/v2/gpu/list" \
 
 ## 第二步：创建实例
 
-使用选定的资源创建您的第一个实例：
+使用选定的资源创建您的第一个实例。创建建议传入可选的 `idempotency_key`**（业务订单号或 UUID）：同一用户同一 key 最多创建一台实例，超时重试时不会重复开实例或重复扣费。详见 [通过 Pod 创建实例](/api-reference/instance/create-by-pod)。
 
 <CodeGroup>
 
@@ -57,12 +57,14 @@ curl -X POST "https://www.chenyu.cn/api/open/v2/instance/create_by_pod" \
     "pod_uuid": "pod_12345678-1234-1234-1234-123456789012",
     "pod_tag": "latest",
     "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
-    "gpu_nums": 1
+    "gpu_nums": 1,
+    "idempotency_key": "quickstart-order-001"
   }'
 ```
 
 ```python Python
 import requests
+import uuid
 
 url = "https://www.chenyu.cn/api/open/v2/instance/create_by_pod"
 headers = {
@@ -74,13 +76,16 @@ data = {
     "pod_uuid": "pod_12345678-1234-1234-1234-123456789012",
     "pod_tag": "latest",
     "gpu_uuid": "gpu_87654321-4321-4321-4321-210987654321",
-    "gpu_nums": 1
+    "gpu_nums": 1,
+    "idempotency_key": f"quickstart-{uuid.uuid4()}"
 }
 
 response = requests.post(url, headers=headers, json=data)
 instance_info = response.json()
 if instance_info['code'] == 0:
-    print(f"实例UUID: {instance_info['data']['instance_uuid']}")
+    data = instance_info['data']
+    print(f"实例UUID: {data['instance_uuid']}")
+    print(f"是否幂等重放: {data.get('idempotent', False)}")
 else:
     print(f"创建失败: {instance_info['msg']}")
 ```
