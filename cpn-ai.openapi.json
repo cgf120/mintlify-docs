@@ -397,7 +397,7 @@
       "post": {
         "summary": "通过Pod创建实例",
         "deprecated": false,
-        "description": "",
+        "description": "使用指定的Pod创建GPU实例。支持可选 idempotency_key，同一用户同 key 最多创建一台。",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -421,11 +421,24 @@
                   "gpu_nums": {
                     "type": "integer",
                     "description": "使用gpu数量  1/2/4/8"
+                  },
+                  "charging_type": {
+                    "type": "integer",
+                    "description": "计费类型：1按量（默认） 2包日 3包周 4包月"
+                  },
+                  "charging_num": {
+                    "type": "integer",
+                    "description": "计费数量（几天/几周/几月），包年包月时默认1"
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "可选幂等键。同一用户同 key 在有效期内最多创建一台实例；不传则每次新建。建议业务订单号或 UUID"
                   }
                 },
                 "required": [
                   "pod_uuid",
-                  "pod_tag",
                   "gpu_uuid",
                   "gpu_nums"
                 ]
@@ -529,6 +542,14 @@
                         "gpu_nums": {
                           "type": "integer",
                           "description": "实例使用的gpu数量"
+                        },
+                        "charging_num": {
+                          "type": "integer",
+                          "description": "计费数量"
+                        },
+                        "idempotent": {
+                          "type": "boolean",
+                          "description": "是否为幂等重放。true=未再次创建/扣费，返回同一 instance_uuid 的当前视图；false=本次真实创建"
                         }
                       },
                       "required": [
@@ -568,7 +589,7 @@
       "post": {
         "summary": "通过镜像创建实例 Copy",
         "deprecated": false,
-        "description": "",
+        "description": "使用指定的镜像创建GPU实例。支持可选 idempotency_key，同一用户同 key 最多创建一台。",
         "tags": [],
         "parameters": [],
         "requestBody": {
@@ -588,6 +609,20 @@
                   "gpu_nums": {
                     "type": "integer",
                     "description": "使用gpu数量  1/2/4/8"
+                  },
+                  "charging_type": {
+                    "type": "integer",
+                    "description": "计费类型：1按量（默认） 2包日 3包周 4包月"
+                  },
+                  "charging_num": {
+                    "type": "integer",
+                    "description": "计费数量（几天/几周/几月），包年包月时默认1"
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "可选幂等键。同一用户同 key 在有效期内最多创建一台实例；不传则每次新建。建议业务订单号或 UUID"
                   }
                 },
                 "required": [
@@ -695,6 +730,14 @@
                         "gpu_nums": {
                           "type": "integer",
                           "description": "实例使用的gpu数量"
+                        },
+                        "charging_num": {
+                          "type": "integer",
+                          "description": "计费数量"
+                        },
+                        "idempotent": {
+                          "type": "boolean",
+                          "description": "是否为幂等重放。true=未再次创建/扣费，返回同一 instance_uuid 的当前视图；false=本次真实创建"
                         }
                       },
                       "required": [
